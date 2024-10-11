@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask , jsonify
 from config.db_init import init_db , init_models 
 from config.jwt_init import init_jwt
 from flask_cors import CORS
@@ -24,6 +24,14 @@ def before_request():
     if not models_initialized:
         init_models(app,db)
         models_initialized = True
+        
+@jwt.unauthorized_loader
+def unauthorized_response(callback):
+    return jsonify({
+        'mc': '20401',
+        'm': 'Missing Authorization Header',
+        'dt' : ''
+    }), 401
 
 if __name__ == '__main__':
     app.run(debug=True)
