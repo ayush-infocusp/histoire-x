@@ -22,7 +22,7 @@ def setTodos(request):
     userCode = request.headers.get('userCode') 
     taskRequest = request.get_json()
     task = Task(userId = userCode,
-                task = taskRequest['data'],
+                task = taskRequest['task'],
                 status = taskRequest['status'])
     db.session.add(task)
     db.session.commit()

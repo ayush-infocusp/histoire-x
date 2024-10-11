@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required
     
 @app.route('/app/getTodos',methods=["GET"])
 @cross_origin(supports_credentials=True)
+@jwt_required()
 def getUserTodos():
     try:
         tasks_as_dicts = getTodos(request)
@@ -21,6 +22,7 @@ def getUserTodos():
 
 @app.route('/app/setTodos',methods=["POST"])
 @cross_origin(supports_credentials=True)
+@jwt_required()
 def setUserTodos():
     try:
         taskResp = setTodos(request)
@@ -33,6 +35,7 @@ def setUserTodos():
 
 @app.route('/app/updateTodos',methods=["PATCH"])
 @cross_origin(supports_credentials=True)
+@jwt_required()
 def updateUserTodos():
     try:
         taskResp = updateTodos(request)
@@ -45,6 +48,7 @@ def updateUserTodos():
 
 @app.route('/app/deleteTodos/<int:task_id>',methods=["DELETE"])
 @cross_origin(supports_credentials=True)
+@jwt_required()
 def deleteUserTodos(task_id):
     try:
         taskResp = deleteTodos(task_id)

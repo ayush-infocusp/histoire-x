@@ -1,12 +1,13 @@
-from flask import Flask , request ,make_response 
+import os
+from flask import Flask
 from config.db_init import init_db , init_models 
 from config.jwt_init import init_jwt
 from flask_cors import CORS
 
-
+basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 # setup the db config
-db = init_db(app)
+db = init_db(app,basedir)
 
 from controller.clientController import *
 from controller.authContoller import *
