@@ -2,6 +2,8 @@ from flask import Flask , request ,make_response
 from config.db_init import init_db , init_models 
 from config.jwt_init import init_jwt
 from flask_jwt_extended import jwt_required
+from flask_cors import CORS, cross_origin
+
 
 app = Flask(__name__)\
 # setup the db config
@@ -13,6 +15,7 @@ from services.appService import getTodos , setTodos , updateTodos , deleteTodos
 models_initialized = False
 # setup the jwt
 jwt = init_jwt(app)
+CORS(app, support_credentials=True)
 
 @app.before_request
 def before_request():
@@ -22,11 +25,11 @@ def before_request():
         models_initialized = True
 
 @app.route('/app/getTodos',methods=["GET"])
-@jwt_required()
+@cross_origin(supports_credentials=True)
 def getUserTodos():
     try:
         tasks_as_dicts = getTodos(request)
-        if tasks_as_dicts.size == 0:
+        if not tasks_as_dicts:
             responseData = {'m': 'Task Received!','mc' :'S20004','dt' :tasks_as_dicts}
         else:
             responseData = {'m': 'Task Received!','mc' :'S20000','dt' :tasks_as_dicts}

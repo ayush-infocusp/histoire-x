@@ -6,9 +6,13 @@ from models.tasks import Task
 def getTodos(request):
     pageNumber = int(request.args.get('pageNo',1))
     pageSize = int(request.args.get('pageSize',10))
-    userCode = request.headers.get('userCode')
+    userCode = str(request.headers.get('userCode'))
+    status = request.args.get('status')
     offset_value = (pageNumber - 1) * pageSize
-    stmt = db.select(Task).filter_by(userId = userCode).limit(pageSize).offset(offset_value)
+    if status:
+        stmt = db.select(Task).filter_by(userId = userCode,status = status,deleted = False).limit(pageSize).offset(offset_value)
+    else:
+        stmt = db.select(Task).filter_by(userId = userCode,deleted = False).limit(pageSize).offset(offset_value)
     taskLists =  db.session.execute(stmt).scalars().all()
     tasks_as_dicts = [task_to_dict(task) for task in taskLists]
     return tasks_as_dicts
