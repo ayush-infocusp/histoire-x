@@ -2,9 +2,11 @@ from app import app
 from services.authService import loginUser , signupUser
 from flask import request ,make_response 
 from flask_jwt_extended import jwt_required
+from flask_cors import cross_origin
 
 
 @app.route('/login',methods=["POST"])
+@cross_origin(supports_credentials=True)
 def login():
     try:
         taskResp = loginUser(request)
@@ -16,6 +18,7 @@ def login():
     return response
 
 @app.route('/signup',methods=["POST"])
+@cross_origin(supports_credentials=True)
 def signup():
     try:
         taskResp = signupUser(request)

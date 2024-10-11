@@ -20,6 +20,7 @@ def getUserTodos():
     return response
 
 @app.route('/app/setTodos',methods=["POST"])
+@cross_origin(supports_credentials=True)
 def setUserTodos():
     try:
         taskResp = setTodos(request)
@@ -31,6 +32,7 @@ def setUserTodos():
     return response
 
 @app.route('/app/updateTodos',methods=["PATCH"])
+@cross_origin(supports_credentials=True)
 def updateUserTodos():
     try:
         taskResp = updateTodos(request)
@@ -42,6 +44,7 @@ def updateUserTodos():
     return response
 
 @app.route('/app/deleteTodos/<int:task_id>',methods=["DELETE"])
+@cross_origin(supports_credentials=True)
 def deleteUserTodos(task_id):
     try:
         taskResp = deleteTodos(task_id)
