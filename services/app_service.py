@@ -48,10 +48,7 @@ def deleteTodos(task_id):
         
         
 # get the users on the basis of the roles and deleted
-def getUserData(request):
-    pageNumber = int(request.args.get('pageNo',1))
-    pageSize = int(request.args.get('pageSize',10))
-    delete = request.args.get('deleted',default =False , type = is_value_bool_true)
+def getUserData(pageNumber : int, pageSize : int , delete : bool):
     offset_value = (pageNumber - 1) * pageSize
     user_lists =  User.getUsersByStatus(pageSize,offset_value,delete)
     user_dicts = [userModel_to_user(user) for user in user_lists]

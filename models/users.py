@@ -1,5 +1,7 @@
 from config.db_init import db
 from datetime import datetime
+from typing import List
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True , autoincrement=True)
@@ -11,7 +13,7 @@ class User(db.Model):
     updatedAt = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     deleted = db.Column(db.Boolean, default=False, nullable=False)
     
-    def getUsersByStatus(pageSize,offset_value,delete):
+    def getUsersByStatus(pageSize : int,offset_value : int,delete : bool)-> List['User']:
         stmt = db.select(User).filter_by(deleted = delete).limit(pageSize).offset(offset_value)
         user_lists =  db.session.execute(stmt).scalars().all()
         return user_lists

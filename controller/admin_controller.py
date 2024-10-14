@@ -5,6 +5,15 @@ from flask_cors import CORS, cross_origin
 from flask_jwt_extended import jwt_required
 from common.validators.request_role_auth import role_required
 from common.constants.app_constant import Role
+from dataclasses import dataclass
+from common.utils import is_value_bool_true
+
+@dataclass
+class GetUserRequest:
+    page_no: int
+    page_size: int
+    deleted: bool
+
     
 @app.route('/admin/getUsers',methods=["GET"])
 @cross_origin(supports_credentials=True)
@@ -12,8 +21,10 @@ from common.constants.app_constant import Role
 @role_required(Role.ADMIN.value)
 def getUsers():
     try:
-        users_as_dicts = getUserData(request)
-        print(users_as_dicts)
+        pageNumber : int = request.args.get('pageNo',1 , type= int)
+        pageSize : int = request.args.get('pageSize',10 , type = int)
+        delete : bool = request.args.get('deleted',default =False , type = is_value_bool_true)
+        users_as_dicts = getUserData(pageNumber,pageSize,delete)
         if not users_as_dicts:
             responseData = {'m': 'Task Received!','mc' :'S20004','dt' :users_as_dicts}
         else:
