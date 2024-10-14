@@ -8,27 +8,20 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 # setup the db config
 db = init_db(app,basedir)
+init_models(app,db)
 
-from controller.clientController import *
-from controller.authContoller import *
+from controller.client_controller import *
+from controller.auth_contoller import *
+from controller.admin_controller import *
 
-#set model initialisation for not re-creating new models always
-models_initialized = False
 # setup the jwt
 jwt = init_jwt(app)
 CORS(app, support_credentials=True)
-
-@app.before_request
-def before_request():
-    global models_initialized
-    if not models_initialized:
-        init_models(app,db)
-        models_initialized = True
         
 @jwt.unauthorized_loader
 def unauthorized_response(callback):
     return jsonify({
-        'mc': '20401',
+        'mc': 'E20401',
         'm': 'Missing Authorization Header',
         'dt' : ''
     }), 401

@@ -17,7 +17,8 @@ def signupUser(request):
     userName = request.json.get("username",None)
     newUser = User(email = userEmail,
                    password_hash = password,
-                   username = userName)
+                   username = userName,
+                   role = "ADMIN")
     db.session.add(newUser)
     db.session.commit()
     userInfo = userModel_to_user(newUser)

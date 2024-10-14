@@ -1,6 +1,9 @@
 import os
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql import func
+# from sqlalchemy.orm import declarative_base
+
+
+# Base = declarative_base()
 
 db = None
 
@@ -12,5 +15,6 @@ def init_db(app,basedir):
     return db
 
 def init_models(app,db):
-    with app.app_context():
-        db.create_all()
+    pass
+    # with app.app_context():
+    #     db.create_all()

@@ -1,5 +1,5 @@
 from app import app
-from services.appService import getTodos , setTodos , updateTodos , deleteTodos
+from services.app_service import getTodos , setTodos , updateTodos , deleteTodos
 from flask import request ,make_response 
 from flask_cors import CORS, cross_origin
 from flask_jwt_extended import jwt_required

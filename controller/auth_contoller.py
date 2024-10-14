@@ -1,5 +1,5 @@
 from app import app
-from services.authService import loginUser , signupUser
+from services.auth_service import loginUser , signupUser
 from flask import request ,make_response 
 from flask_jwt_extended import jwt_required
 from flask_cors import cross_origin

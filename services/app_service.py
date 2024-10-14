@@ -1,6 +1,8 @@
-from common.helper import task_to_dict
+from common.helper import task_to_dict , userModel_to_user
+from common.utils import is_value_bool_true
 from config.db_init import db
 from models.tasks import Task
+from models.users import User
 
 # get the todos on the basis of the user
 def getTodos(request):
@@ -44,3 +46,19 @@ def deleteTodos(task_id):
     task.deleted = True
     db.session.commit()
         
+        
+# get the users on the basis of the roles and deleted
+def getUserData(request):
+    pageNumber = int(request.args.get('pageNo',1))
+    pageSize = int(request.args.get('pageSize',10))
+    delete = request.args.get('deleted',default =False , type = is_value_bool_true)
+    offset_value = (pageNumber - 1) * pageSize
+    user_lists =  User.getUsersByStatus(pageSize,offset_value,delete)
+    user_dicts = [userModel_to_user(user) for user in user_lists]
+    return user_dicts
+
+def setUserData(request):
+    pass
+
+def deleteUserData(request):
+    pass
