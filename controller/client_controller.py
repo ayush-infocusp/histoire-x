@@ -3,10 +3,13 @@ from services.app_service import getTodos , setTodos , updateTodos , deleteTodos
 from flask import request ,make_response 
 from flask_cors import CORS, cross_origin
 from flask_jwt_extended import jwt_required
+from common.validators.request_role_auth import role_required
+from common.constants.app_constant import Role
     
 @app.route('/app/getTodos',methods=["GET"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
+@role_required(Role.CLIENT.value)
 def getUserTodos():
     try:
         tasks_as_dicts = getTodos(request)
@@ -23,6 +26,7 @@ def getUserTodos():
 @app.route('/app/setTodos',methods=["POST"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
+@role_required(Role.CLIENT.value)
 def setUserTodos():
     try:
         taskResp = setTodos(request)
@@ -36,6 +40,7 @@ def setUserTodos():
 @app.route('/app/updateTodos',methods=["PATCH"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
+@role_required(Role.CLIENT.value)
 def updateUserTodos():
     try:
         taskResp = updateTodos(request)
@@ -49,6 +54,7 @@ def updateUserTodos():
 @app.route('/app/deleteTodos/<int:task_id>',methods=["DELETE"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
+@role_required(Role.CLIENT.value)
 def deleteUserTodos(task_id):
     try:
         taskResp = deleteTodos(task_id)

@@ -3,10 +3,13 @@ from services.app_service import getUserData , setUserData , deleteUserData
 from flask import request ,make_response 
 from flask_cors import CORS, cross_origin
 from flask_jwt_extended import jwt_required
+from common.validators.request_role_auth import role_required
+from common.constants.app_constant import Role
     
 @app.route('/admin/getUsers',methods=["GET"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
+@role_required(Role.ADMIN.value)
 def getUsers():
     try:
         users_as_dicts = getUserData(request)
@@ -25,6 +28,7 @@ def getUsers():
 @app.route('/admin/setUsers',methods=["POST"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
+@role_required(Role.ADMIN.value)
 def setUsers():
     try:
         userResp = setUserData(request)
@@ -38,6 +42,7 @@ def setUsers():
 @app.route('/admin/deleteUsers/<int:user_id>',methods=["DELETE"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
+@role_required(Role.ADMIN.value)
 def deleteUsers(user_id):
     try:
         userResp = deleteUserData(user_id)

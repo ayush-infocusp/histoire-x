@@ -1,6 +1,6 @@
 import os
 from flask import Flask , jsonify
-from config.db_init import init_db , init_models 
+from config.db_init import init_db
 from config.jwt_init import init_jwt
 from flask_cors import CORS
 
@@ -8,7 +8,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 # setup the db config
 db = init_db(app,basedir)
-init_models(app,db)
 
 from controller.client_controller import *
 from controller.auth_contoller import *
