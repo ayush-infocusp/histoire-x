@@ -17,7 +17,7 @@ def login():
     except Exception:
         responseData = {'m': 'User cred not valid!',
                         'mc': MessageCode.ERROR.value,
-                        'dt': taskResp}
+                        'dt': ''}
         response = make_response(responseData, 400)
     return response
 

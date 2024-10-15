@@ -44,23 +44,25 @@ def getUsers():
     return response
 
 
-@app.route('/admin/setUsers', methods=["POST"])
+@app.route('/admin/updateUsers', methods=["PATCH"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.ADMIN.value)
 def setUsers():
-    try:
-        userResp = setUserData(request)
+    # try:
+        updateRequest = request.get_json()
+        userResp = setUserData(updateRequest['userId'], updateRequest['role'], updateRequest['deleted'])
         responseData = {'m': 'Task Saved!',
                         'mc': MessageCode.ACCEPTED.value,
                         'dt': userResp}
         response = make_response(responseData, 201)
-    except Exception:
-        responseData = {'m': 'Task Could not be saved!',
-                        'mc': MessageCode.ERROR.value,
-                        'dt': userResp}
-        response = make_response(responseData, 400)
-    return response
+        return response
+    # except Exception:
+        # responseData = {'m': 'Task Could not be saved!',
+                        # 'mc': MessageCode.ERROR.value,
+                        # 'dt': ''}
+        # response = make_response(responseData, 400)
+    # return response
 
 
 @app.route('/admin/deleteUsers/<int:user_id>', methods=["DELETE"])
@@ -69,14 +71,14 @@ def setUsers():
 @role_required(Role.ADMIN.value)
 def deleteUsers(user_id):
     try:
-        userResp = deleteUserData(user_id)
-        responseData = {'m': 'Task Deleted!',
+        deleteUserData(user_id)
+        responseData = {'m': 'User & Tasks Deleted!',
                         'mc': MessageCode.SUCCESS.value,
                         'dt': ''}
         response = make_response(responseData, 200)
     except Exception:
-        responseData = {'m': 'Task Could not be deleted!',
+        responseData = {'m': 'User Could not be deleted!',
                         'mc': MessageCode.ERROR.value,
-                        'dt': userResp}
+                        'dt': ''}
         response = make_response(responseData, 400)
     return response

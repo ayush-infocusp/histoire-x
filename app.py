@@ -12,6 +12,7 @@ db = init_db(app, basedir)
 from controller.client_controller import *
 from controller.auth_contoller import *
 from controller.admin_controller import *
+from common.interceptor import *
 
 # setup the jwt
 jwt = init_jwt(app)

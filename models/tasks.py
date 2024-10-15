@@ -4,7 +4,7 @@ from config.db_init import db
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    userId = db.Column(db.String(20), nullable=False)
+    userId = db.Column(db.String(20), db.ForeignKey('user.id'), nullable=False)
     task = db.Column(db.String(120), nullable=False)
     status = db.Column(db.String(20), nullable=False)
     createdAt = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

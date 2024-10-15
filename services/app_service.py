@@ -2,6 +2,7 @@ from common.helper import task_to_dict, userModel_to_user
 from config.db_init import db
 from models.tasks import Task
 from models.users import User
+from common.constants.app_constant import Role 
 
 
 # get the todos on the basis of the user
@@ -60,9 +61,22 @@ def getUserData(pageNumber: int, pageSize: int, delete: bool):
     return user_dicts
 
 
-def setUserData(request):
-    pass
+def setUserData(user_id: int, role: Role, deleted: bool):
+    user = User.getUserById(user_id)
+    if user:
+        user.role = role
+        user.deleted = deleted
+        db.session.commit()
+        return userModel_to_user(user)
+    else:
+        return None
 
 
-def deleteUserData(request):
-    pass
+def deleteUserData(user_id):
+    user = User.getUserById(user_id)
+    if user:
+        user.deleted = True
+        tasks = db.session.query(Task).filter(Task.userId == user_id).all()
+        for task in tasks:
+            task.deleted = True
+        db.session.commit()
