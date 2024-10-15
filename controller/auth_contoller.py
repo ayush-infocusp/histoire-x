@@ -2,6 +2,7 @@ from app import app
 from services.auth_service import loginUser, signupUser
 from flask import request, make_response
 from flask_cors import cross_origin
+from common.constants.app_constant import MessageCode
 
 
 @app.route('/login', methods=["POST"])
@@ -9,13 +10,13 @@ from flask_cors import cross_origin
 def login():
     try:
         taskResp = loginUser(request)
-        responseData = {'m': 'User LoggedIn!', 
-                        'mc': 'S20001',
+        responseData = {'m': 'User LoggedIn!',
+                        'mc': MessageCode.CREATED.value,
                         'dt': taskResp}
         response = make_response(responseData, 201)
     except Exception:
         responseData = {'m': 'User cred not valid!',
-                        'mc': 'S20404',
+                        'mc': MessageCode.ERROR.value,
                         'dt': taskResp}
         response = make_response(responseData, 400)
     return response
@@ -27,12 +28,12 @@ def signup():
     try:
         taskResp = signupUser(request)
         responseData = {'m': 'User onboarded!',
-                        'mc': 'S20001',
+                        'mc': MessageCode.CREATED.value,
                         'dt': taskResp}
         response = make_response(responseData, 201)
     except Exception:
         responseData = {'m': 'User Could not be saved!',
-                        'mc': 'S20404',
+                        'mc': MessageCode.ERROR.value,
                         'dt': ''}
         response = make_response(responseData, 400)
     return response
