@@ -18,13 +18,13 @@ from common.interceptor import *
 jwt = init_jwt(app)
 CORS(app, support_credentials=True)
 
-   
+
 @jwt.unauthorized_loader
 def unauthorized_response(callback):
     return jsonify({
-        'mc': 'E20401',
-        'm': 'Missing Authorization Header',
-        'dt': ''
+        'message_code': 'E20401',
+        'message': 'Missing Authorization Header',
+        'data': ''
     }), 401
 
 

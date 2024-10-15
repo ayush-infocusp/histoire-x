@@ -15,18 +15,18 @@ def getUserTodos():
     try:
         tasks_as_dicts = getTodos(request)
         if not tasks_as_dicts:
-            responseData = {'m': 'Task Received!',
-                            'mc': MessageCode.NO_DATA.value,
-                            'dt': tasks_as_dicts}
+            responseData = {'message': 'Task Received!',
+                            'message_code': MessageCode.NO_DATA.value,
+                            'data': tasks_as_dicts}
         else:
-            responseData = {'m': 'Task Received!',
-                            'mc': MessageCode.SUCCESS.value,
-                            'dt': tasks_as_dicts}
+            responseData = {'message': 'Task Received!',
+                            'message_code': MessageCode.SUCCESS.value,
+                            'data': tasks_as_dicts}
         response = make_response(responseData, 200)
     except Exception:
-        responseData = {'m': 'Task could not be Retrived!',
-                        'mc': MessageCode.ERROR.value,
-                        'dt': ''}
+        responseData = {'message': 'Task could not be Retrived!',
+                        'message_code': MessageCode.ERROR.value,
+                        'data': ''}
         response = make_response(responseData, 400)
     return response
 
@@ -38,14 +38,14 @@ def getUserTodos():
 def setUserTodos():
     try:
         taskResp = setTodos(request)
-        responseData = {'m': 'Task Saved!',
-                        'mc': MessageCode.CREATED.value,
-                        'dt': taskResp}
+        responseData = {'message': 'Task Saved!',
+                        'message_code': MessageCode.CREATED.value,
+                        'data': taskResp}
         response = make_response(responseData, 201)
     except Exception:
-        responseData = {'m': 'Task Could not be saved!',
-                        'mc': MessageCode.ERROR.value,
-                        'dt': taskResp}
+        responseData = {'message': 'Task Could not be saved!',
+                        'message_code': MessageCode.ERROR.value,
+                        'data': taskResp}
         response = make_response(responseData, 400)
     return response
 
@@ -57,14 +57,14 @@ def setUserTodos():
 def updateUserTodos():
     try:
         taskResp = updateTodos(request)
-        responseData = {'m': 'Task Saved!',
-                        'mc': MessageCode.ACCEPTED.value,
-                        'dt': taskResp}
+        responseData = {'message': 'Task Saved!',
+                        'message_code': MessageCode.ACCEPTED.value,
+                        'data': taskResp}
         response = make_response(responseData, 202)
     except Exception:
-        responseData = {'m': 'Task Could not be updated!',
-                        'mc': MessageCode.ERROR.value,
-                        'dt': taskResp}
+        responseData = {'message': 'Task Could not be updated!',
+                        'message_code': MessageCode.ERROR.value,
+                        'data': taskResp}
         response = make_response(responseData, 400)
     return response
 
@@ -76,13 +76,13 @@ def updateUserTodos():
 def deleteUserTodos(task_id):
     try:
         taskResp = deleteTodos(task_id)
-        responseData = {'m': 'Task Deleted!',
-                        'mc': MessageCode.SUCCESS.value,
-                        'dt': ''}
+        responseData = {'message': 'Task Deleted!',
+                        'message_code': MessageCode.SUCCESS.value,
+                        'data': ''}
         response = make_response(responseData, 200)
     except Exception:
-        responseData = {'m': 'Task Could not be deleted!',
-                        'mc': MessageCode.ERROR.value,
-                        'dt': taskResp}
+        responseData = {'message': 'Task Could not be deleted!',
+                        'message_code': MessageCode.ERROR.value,
+                        'data': taskResp}
         response = make_response(responseData, 400)
     return response

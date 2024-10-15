@@ -16,17 +16,17 @@ def role_required(restricted_role):
                 user_role = jwt_data.get("role", "guest")
                 if user_role not in allowed_roles or user_role != restricted_role :
                     responseData = {
-                        'm': 'Access Denied: Insufficient Permissions!',
-                        'mc': MessageCode.UNAUTHORIZED.value,
-                        'dt': ''
+                        'message': 'Access Denied: Insufficient Permissions!',
+                        'message_code': MessageCode.UNAUTHORIZED.value,
+                        'data': ''
                         }
                     return make_response(responseData, 401)
                 return fn(*args, **kwargs)
             except Exception as e:
                 responseData = {
-                        'm': 'Invalid Request',
-                        'mc': MessageCode.UNAUTHORIZED.value,
-                        'dt': str(e)
+                        'message': 'Invalid Request',
+                        'message_code': MessageCode.UNAUTHORIZED.value,
+                        'data': str(e)
                     }
                 return make_response(responseData, 401)
         return wrapper
