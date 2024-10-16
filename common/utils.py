@@ -1,5 +1,4 @@
-from flask_jwt_extended import create_access_token
-
+from flask_jwt_extended import create_access_token, get_jwt
 
 def createToken(user):
     additional_claims = {
@@ -15,3 +14,9 @@ def createToken(user):
 
 def is_value_bool_true(value):
     return value.lower() == 'true'
+
+
+def getDataFromToken(key):
+    jwt_data = get_jwt()
+    user_role = jwt_data.get(key, "-")
+    return user_role

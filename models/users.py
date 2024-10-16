@@ -1,10 +1,12 @@
 from config.db_init import db
 from datetime import datetime
 from typing import List
+from uuid import uuid4
 
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid4()))
     username = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     role = db.Column(db.String(120), nullable=False)

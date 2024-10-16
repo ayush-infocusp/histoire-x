@@ -7,7 +7,7 @@ from common.validators.request_role_auth import role_required
 from common.constants.app_constant import Role, MessageCode
 
 
-@app.route('/app/getTodos', methods=["GET"])
+@app.route('/app/todos', methods=["GET"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
@@ -26,12 +26,12 @@ def getUserTodos():
     except Exception:
         responseData = {'message': 'Task could not be Retrived!',
                         'message_code': MessageCode.ERROR.value,
-                        'data': ''}
+                        'data': str(tasks_as_dicts)}
         response = make_response(responseData, 400)
     return response
 
 
-@app.route('/app/setTodos', methods=["POST"])
+@app.route('/app/todos', methods=["POST"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
@@ -50,26 +50,27 @@ def setUserTodos():
     return response
 
 
-@app.route('/app/updateTodos', methods=["PATCH"])
+@app.route('/app/todos', methods=["PATCH"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
 def updateUserTodos():
     try:
         taskResp = updateTodos(request)
-        responseData = {'message': 'Task Saved!',
+        print(taskResp)
+        responseData = {'message': 'Task Updated!',
                         'message_code': MessageCode.ACCEPTED.value,
                         'data': taskResp}
         response = make_response(responseData, 202)
     except Exception:
         responseData = {'message': 'Task Could not be updated!',
                         'message_code': MessageCode.ERROR.value,
-                        'data': taskResp}
+                        'data': str(taskResp)}
         response = make_response(responseData, 400)
     return response
 
 
-@app.route('/app/deleteTodos/<int:task_id>', methods=["DELETE"])
+@app.route('/app/todos/<int:task_id>', methods=["DELETE"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)

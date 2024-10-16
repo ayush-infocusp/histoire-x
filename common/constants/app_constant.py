@@ -6,6 +6,11 @@ class Role(Enum):
     CLIENT = "CLIENT"
 
 
+class Status(Enum):
+    PENDING = "PENDING"
+    COMPLETED = "COMPLETED"
+
+
 class MessageCode(Enum):
     SUCCESS = "S20000"
     CREATED = "S20201"

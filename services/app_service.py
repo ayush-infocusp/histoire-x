@@ -2,15 +2,18 @@ from common.helper import task_to_dict, userModel_to_user
 from config.db_init import db
 from models.tasks import Task
 from models.users import User
-from common.constants.app_constant import Role 
+from common.constants.app_constant import Role, Status
+from common.utils import getDataFromToken
 
 
 # get the todos on the basis of the user
 def getTodos(request):
     pageNumber = int(request.args.get('pageNo', 1))
     pageSize = int(request.args.get('pageSize', 10))
-    userCode = str(request.headers.get('userCode'))
+    userCode = str(getDataFromToken('id'))
     status = request.args.get('status')
+    if status and status not in [s.value for s in Status]:
+        return Exception("status not acceptable")
     offset_value = (pageNumber - 1) * pageSize
     if status:
         stmt = db.select(Task).filter_by(userId=userCode,
@@ -25,7 +28,7 @@ def getTodos(request):
 
 # set the todo item wrt the user identifer
 def setTodos(request):
-    userCode = request.headers.get('userCode') 
+    userCode = str(getDataFromToken('id'))
     taskRequest = request.get_json()
     task = Task(userId=userCode,
                 task=taskRequest['task'],
@@ -39,7 +42,10 @@ def setTodos(request):
 # update specific todo item on the basis of task identifier
 def updateTodos(request):
     taskRequest = request.get_json()
-    task = db.session.query(Task).filter(Task.id == taskRequest['id']).one()
+    userCode = str(getDataFromToken('id'))
+    task = db.session.query(Task).filter(Task.id == taskRequest['id'], Task.userId == userCode).one_or_none()
+    if not task:
+        return Exception("selected data is invalid")
     task.status = taskRequest['status']
     db.session.commit()
     taskResp = task_to_dict(task)
@@ -48,7 +54,7 @@ def updateTodos(request):
 
 # soft delete specific todo item on the basis of task identifier
 def deleteTodos(task_id):
-    task = db.session.query(Task).filter(Task.id == task_id).one() 
+    task = db.session.query(Task).filter(Task.id == task_id).one()
     task.deleted = True
     db.session.commit()
 

@@ -17,11 +17,10 @@ def signupUser(request):
     userEmail = request.json.get("email", None)
     password = request.json.get("password", None)
     userName = request.json.get("username", None)
-    userRole = request.json.get("role", Role.CLIENT.value)
     newUser = User(email=userEmail,
                    password_hash=password,
                    username=userName,
-                   role=userRole)
+                   role=Role.CLIENT.value)
     db.session.add(newUser)
     db.session.commit()
     userInfo = userModel_to_user(newUser)
