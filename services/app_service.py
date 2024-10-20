@@ -4,6 +4,13 @@ from models.tasks import Task
 from models.users import User
 from common.constants.app_constant import Role, Status
 from common.utils import getDataFromToken
+import os
+
+UPLOAD_DIR = "upload_data"
+# Directory to store temporary files
+
+# Ensure the upload directory exists
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 # get the todos on the basis of the user
@@ -86,3 +93,42 @@ def deleteUserData(user_id):
         for task in tasks:
             task.deleted = True
         db.session.commit()
+
+
+def uploadFile(request):
+    print(request.form.get('is_multipart'))
+    is_multipart = request.form.get('is_multipart') == 'true'
+    print(request.files)
+    if "file_chunk" not in request.files:
+        return 'No file part!'
+    file = request.files['file_chunk']
+    if file.filename == '':
+        return 'No selected file'
+    if not is_multipart:
+        fileUploadNotMultipart(file, file.filename)
+    else:
+        fileUploadMultipart(file, file.filename, request)
+    return 'File uploaded successfully!'
+
+
+def fileUploadNotMultipart(file, fileName):
+    filepath = os.path.join(UPLOAD_DIR, f'{fileName}')
+    file.save(filepath)
+
+
+def fileUploadMultipart(file, fileName, request):
+    file_id = request.form.get('file_id')
+    is_last_chunk = request.form.get('is_last_chunk') == 'true'
+    filepath = os.path.join(UPLOAD_DIR, f'{file_id}_{fileName}')
+    if not is_last_chunk:
+        file.save(filepath)
+        return 'Chunk received successfully'
+    else:
+        with open(filepath, 'ab') as f:
+            f.write(file.read())
+    return 'File uploaded successfully!'
+
+
+def save_chunk_to_disk(file_path, chunk):
+    with open(file_path, 'ab') as f:  # 'ab' mode for appending in binary
+        f.write(chunk)

@@ -1,5 +1,5 @@
 from app import app
-from services.app_service import getTodos, setTodos, updateTodos, deleteTodos
+from services.app_service import getTodos, setTodos, updateTodos, deleteTodos, uploadFile
 from flask import request, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
@@ -87,3 +87,22 @@ def deleteUserTodos(task_id):
                         'data': taskResp}
         response = make_response(responseData, 400)
     return response
+
+
+@app.route('/app/fileUpload', methods=["PUT"])
+@cross_origin(supports_credentials=True)
+@jwt_required()
+@role_required(Role.CLIENT.value)
+def fileUploadTodos():
+    # try:
+        taskResp = uploadFile(request)
+        responseData = {'message': 'File saved!',
+                        'message_code': MessageCode.SUCCESS.value,
+                        'data': taskResp}
+        response = make_response(responseData, 200)
+        return response
+    # except Exception:
+    #     responseData = {'message': 'File Could not be Saved!',
+    #                     'message_code': MessageCode.ERROR.value,
+    #                     'data': ''}
+    #     response = make_response(responseData, 400)

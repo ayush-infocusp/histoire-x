@@ -8,7 +8,7 @@ from common.constants.app_constant import Role
 def loginUser(request):
     userEmail = request.json.get("email", None)
     password = request.json.get("password", None)
-    user = User.query.filter_by(email=userEmail).first()
+    user = User.query.filter_by(email=userEmail, deleted=False).first()
     if user and user.password_hash == password:
         return {'token': createToken(user)}
 
