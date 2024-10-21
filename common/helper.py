@@ -3,7 +3,8 @@ def task_to_dict(task):
         'id': task.id,
         'userId': task.userId,
         'task': task.task,
-        'status': task.status
+        'status': task.status,
+        'type': task.type
     }
 
 

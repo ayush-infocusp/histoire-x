@@ -5,7 +5,8 @@ from config.jwt_init import init_jwt
 from flask_cors import CORS
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-app = Flask(__name__)
+STATIC_FOLDER = 'upload_data'
+app = Flask(__name__, static_folder=STATIC_FOLDER)
 # setup the db config
 db = init_db(app, basedir)
 

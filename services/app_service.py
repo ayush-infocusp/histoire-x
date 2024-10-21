@@ -98,7 +98,7 @@ def deleteUserData(user_id):
 def uploadFile(request):
     print(request.form.get('is_multipart'))
     is_multipart = request.form.get('is_multipart') == 'true'
-    print(request.files)
+    # print(request.files)
     if "file_chunk" not in request.files:
         return 'No file part!'
     file = request.files['file_chunk']
@@ -116,19 +116,27 @@ def fileUploadNotMultipart(file, fileName):
     file.save(filepath)
 
 
-def fileUploadMultipart(file, fileName, request):
+def fileUploadMultipart(file, original_filename, request):
     file_id = request.form.get('file_id')
-    is_last_chunk = request.form.get('is_last_chunk') == 'true'
-    filepath = os.path.join(UPLOAD_DIR, f'{file_id}_{fileName}')
-    if not is_last_chunk:
-        file.save(filepath)
-        return 'Chunk received successfully'
-    else:
-        with open(filepath, 'ab') as f:
-            f.write(file.read())
-    return 'File uploaded successfully!'
+    is_last_chunk = request.form.get('is_last_chunk', 'false').lower() == 'true'
+    file_type = request.form.get('file_type')
+    temp_filepath = os.path.join(UPLOAD_DIR, f"{file_id}_{original_filename}.part")
+    with open(temp_filepath, 'ab') as f:
+        f.write(file.read())
+
+    if is_last_chunk:
+        final_filepath = os.path.join(UPLOAD_DIR, original_filename)
+        os.rename(temp_filepath, final_filepath)
+        print(f"File {original_filename} uploaded successfully!")
+        setTodosForFile(original_filename, file_type)
+    return "Chunk received successfully"
 
 
-def save_chunk_to_disk(file_path, chunk):
-    with open(file_path, 'ab') as f:  # 'ab' mode for appending in binary
-        f.write(chunk)
+def setTodosForFile(original_filename, file_type):
+    userCode = str(getDataFromToken('id'))
+    task = Task(userId=userCode,
+                task=original_filename,
+                status=Status.PENDING.value,
+                type=file_type)
+    db.session.add(task)
+    db.session.commit()

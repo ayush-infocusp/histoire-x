@@ -11,6 +11,12 @@ class Status(Enum):
     COMPLETED = "COMPLETED"
 
 
+class tasksType(Enum):
+    TEXT = "TEXT"
+    AUDIO = "AUDIO"
+    VIDEO = "VIDEO"
+
+
 class MessageCode(Enum):
     SUCCESS = "S20000"
     CREATED = "S20201"
