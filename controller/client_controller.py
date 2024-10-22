@@ -1,10 +1,12 @@
 from app import app
 from services.app_service import getTodos, setTodos, updateTodos, deleteTodos, uploadFile
-from flask import request, make_response
+from flask import request, make_response, send_from_directory
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
 from common.validators.request_role_auth import role_required
 from common.constants.app_constant import Role, MessageCode
+
+STATIC_FOLDER = 'upload_data'
 
 
 @app.route('/app/todos', methods=["GET"])
@@ -90,24 +92,35 @@ def deleteUserTodos(task_id):
 
 
 @app.route('/app/fileUpload', methods=["PUT"])
-@cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
+@cross_origin(supports_credentials=True)
 def fileUploadTodos():
-    # try:
+    try:
         taskResp = uploadFile(request)
         responseData = {'message': 'File saved!',
                         'message_code': MessageCode.SUCCESS.value,
                         'data': taskResp}
         response = make_response(responseData, 200)
-        return response
-    # except Exception:
-    #     responseData = {'message': 'File Could not be Saved!',
-    #                     'message_code': MessageCode.ERROR.value,
-    #                     'data': ''}
-    #     response = make_response(responseData, 400)
+    except Exception:
+        responseData = {'message': 'File Could not be Saved!',
+                        'message_code': MessageCode.ERROR.value,
+                        'data': ''}
+        response = make_response(responseData, 400)
+    return response
 
 
-@app.route('/<path:path>')
+
+@jwt_required()
+@role_required(Role.CLIENT.value)
+@cross_origin(supports_credentials=True)
+@app.route('/send_file/<path:path>', methods=["GET"])
 def static_file(path):
-    return app.send_static_file(path)
+    try:
+        return send_from_directory(STATIC_FOLDER, path)
+    except Exception:
+        responseData = {'message': 'File Could not be Saved!',
+                        'message_code': MessageCode.ERROR.value,
+                        'data': ''}
+        response = make_response(responseData, 400)
+        return response

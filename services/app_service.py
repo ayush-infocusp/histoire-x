@@ -98,6 +98,7 @@ def deleteUserData(user_id):
 def uploadFile(request):
     print(request.form.get('is_multipart'))
     is_multipart = request.form.get('is_multipart') == 'true'
+    file_type = request.form.get('file_type')
     # print(request.files)
     if "file_chunk" not in request.files:
         return 'No file part!'
@@ -105,15 +106,16 @@ def uploadFile(request):
     if file.filename == '':
         return 'No selected file'
     if not is_multipart:
-        fileUploadNotMultipart(file, file.filename)
+        fileUploadNotMultipart(file, file.filename, file_type)
     else:
         fileUploadMultipart(file, file.filename, request)
     return 'File uploaded successfully!'
 
 
-def fileUploadNotMultipart(file, fileName):
+def fileUploadNotMultipart(file, fileName, file_type):
     filepath = os.path.join(UPLOAD_DIR, f'{fileName}')
     file.save(filepath)
+    setTodosForFile(fileName, file_type)
 
 
 def fileUploadMultipart(file, original_filename, request):

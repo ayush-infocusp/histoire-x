@@ -6,7 +6,7 @@ from flask_cors import CORS
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 STATIC_FOLDER = 'upload_data'
-app = Flask(__name__, static_folder=STATIC_FOLDER)
+app = Flask(__name__)
 # setup the db config
 db = init_db(app, basedir)
 
