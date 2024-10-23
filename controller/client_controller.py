@@ -1,10 +1,11 @@
 from app import app
-from services.app_service import getTodos, setTodos, updateTodos, deleteTodos, uploadFile
+from services.app_service import getTodos, setTodos, updateTodos, deleteTodos, uploadFile, getUserFileValid
 from flask import request, make_response, send_from_directory
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
 from common.validators.request_role_auth import role_required
 from common.constants.app_constant import Role, MessageCode
+from common.utils import getDataFromToken
 
 STATIC_FOLDER = 'upload_data'
 
@@ -92,9 +93,9 @@ def deleteUserTodos(task_id):
 
 
 @app.route('/app/fileUpload', methods=["PUT"])
+@cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
-@cross_origin(supports_credentials=True)
 def fileUploadTodos():
     try:
         taskResp = uploadFile(request)
@@ -110,14 +111,22 @@ def fileUploadTodos():
     return response
 
 
-
+@app.route('/send_file/<path:path>', methods=["GET"])
+@cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
-@cross_origin(supports_credentials=True)
-@app.route('/send_file/<path:path>', methods=["GET"])
 def static_file(path):
     try:
-        return send_from_directory(STATIC_FOLDER, path)
+        userCode = str(getDataFromToken('id'))
+        is_valid = getUserFileValid(userCode, path)
+        if is_valid:
+            return send_from_directory(STATIC_FOLDER, path)
+        else:
+            responseData = {'message': 'File Could not be Retrived!',
+                            'message_code': MessageCode.NOT_FOUND.value,
+                            'data': ''}
+            response = make_response(responseData, 404)
+            return response
     except Exception:
         responseData = {'message': 'File Could not be Saved!',
                         'message_code': MessageCode.ERROR.value,

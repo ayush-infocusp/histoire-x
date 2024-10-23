@@ -142,3 +142,11 @@ def setTodosForFile(original_filename, file_type):
                 type=file_type)
     db.session.add(task)
     db.session.commit()
+
+
+def getUserFileValid(userCode: str, path: str):
+    if userCode and path:
+        tasks = db.session.query(Task).filter(Task.userId == userCode,Task.task == path).all()
+        if tasks:
+            return True
+    return False

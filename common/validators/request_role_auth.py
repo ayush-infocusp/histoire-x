@@ -10,7 +10,7 @@ def role_required(restricted_role):
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            try:
+            # try:
                 verify_jwt_in_request()
                 jwt_data = get_jwt()
                 user_role = jwt_data.get("role", "guest")
@@ -23,12 +23,13 @@ def role_required(restricted_role):
                         }
                     return make_response(responseData, 401)
                 return fn(*args, **kwargs)
-            except Exception as e:
-                responseData = {
-                        'message': 'Invalid Request',
-                        'message_code': MessageCode.UNAUTHORIZED.value,
-                        'data': str(e)
-                    }
-                return make_response(responseData, 401)
+
+            # except Exception as e:
+            #     responseData = {
+            #             'message': 'Invalid Request',
+            #             'message_code': MessageCode.UNAUTHORIZED.value,
+            #             'data': str(e)
+            #         }
+            #     return make_response(responseData, 401)
         return wrapper
     return decorator
