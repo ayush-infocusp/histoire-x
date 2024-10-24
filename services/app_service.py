@@ -4,6 +4,7 @@ from models.tasks import Task
 from models.users import User
 from common.constants.app_constant import Role, Status
 from common.utils import getDataFromToken
+from speech_recog import getSpeechDetails
 import os
 
 UPLOAD_DIR = "upload_data"
@@ -43,7 +44,9 @@ def setTodos(request):
     db.session.add(task)
     db.session.commit()
     taskResp = task_to_dict(task)
-    return taskResp
+    text = getSpeechDetails()
+    print("hello there", text)
+    return {"taskResp": taskResp, "text": text}
 
 
 # update specific todo item on the basis of task identifier

@@ -6,6 +6,11 @@ from flask_cors import CORS
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 STATIC_FOLDER = 'upload_data'
+
+
+from speech_recog import *
+
+
 app = Flask(__name__)
 # setup the db config
 db = init_db(app, basedir)

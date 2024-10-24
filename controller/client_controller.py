@@ -41,6 +41,7 @@ def getUserTodos():
 def setUserTodos():
     try:
         taskResp = setTodos(request)
+        print("hello there 2",taskResp)
         responseData = {'message': 'Task Saved!',
                         'message_code': MessageCode.CREATED.value,
                         'data': taskResp}
