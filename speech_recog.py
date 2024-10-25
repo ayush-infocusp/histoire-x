@@ -31,13 +31,15 @@ processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")
 model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
 
 
-def getSpeechDetails():
+def getSpeechDetails(sampleData):
     #
-    sample = next(dataset_iterator)
-    data = sample['audio']['array']
+    # sample = next(dataset_iterator)
+    # data = sample['audio']['array']
+    data = sampleData
+    print("hey there",data)
     # sampling_rate = sample['audio']['sampling_rate']
     #
-    sample
+    # print(sample)
     # Play the audio
     # Play_Audio(data=data, rate=sampling_rate)
     #
@@ -49,7 +51,8 @@ def getSpeechDetails():
     ids = torch.argmax(outputs, dim=-1)[0]
     transcription = processor.decode(ids)
     #
-    actual = sample['raw_transcription']
+    # actual = sample['raw_transcription']
+    actual = ''
     prediction = transcription
     # metrics = jiwer.compute_measures(actual.lower(), prediction.lower())
     #

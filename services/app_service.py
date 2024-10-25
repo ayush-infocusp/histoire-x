@@ -6,6 +6,8 @@ from common.constants.app_constant import Role, Status
 from common.utils import getDataFromToken
 from speech_recog import getSpeechDetails
 import os
+from common.audio_helper import convert_audio_puarray
+import io
 
 UPLOAD_DIR = "upload_data"
 # Directory to store temporary files
@@ -45,7 +47,6 @@ def setTodos(request):
     db.session.commit()
     taskResp = task_to_dict(task)
     text = getSpeechDetails()
-    print("hello there", text)
     return {"taskResp": taskResp, "text": text}
 
 
@@ -102,23 +103,37 @@ def uploadFile(request):
     print(request.form.get('is_multipart'))
     is_multipart = request.form.get('is_multipart') == 'true'
     file_type = request.form.get('file_type')
-    # print(request.files)
     if "file_chunk" not in request.files:
         return 'No file part!'
     file = request.files['file_chunk']
+    text = None
     if file.filename == '':
         return 'No selected file'
     if not is_multipart:
-        fileUploadNotMultipart(file, file.filename, file_type)
+        final_filepath = fileUploadNotMultipart(file, file.filename, file_type)
+        # get speech to text
+        fileData = convert_audio_puarray(final_filepath['final_filepath'])
+        text = getSpeechDetails(fileData['audio_data'])
+        to_save_filename = file.filename + " | TEXT :- " + text['prediction']
+        setTodosForFile(to_save_filename, file_type)
     else:
-        fileUploadMultipart(file, file.filename, request)
-    return 'File uploaded successfully!'
+        multipart_upload_data = fileUploadMultipart(file, file.filename, request)
+        is_last_chunk = request.form.get('is_last_chunk', 'false').lower() == 'true'
+        if multipart_upload_data and is_last_chunk:
+            final_filepath = multipart_upload_data['final_filepath']
+            # get speech to text
+            fileData = convert_audio_puarray(final_filepath)
+            text = getSpeechDetails(fileData['audio_data'])
+            to_save_filename = file.filename + " | TEXT :- " + text['prediction']
+            setTodosForFile(to_save_filename, file_type)
+    return {"message": 'File uploaded successfully!', "text": text}
 
 
 def fileUploadNotMultipart(file, fileName, file_type):
     filepath = os.path.join(UPLOAD_DIR, f'{fileName}')
     file.save(filepath)
-    setTodosForFile(fileName, file_type)
+    # setTodosForFile(fileName, file_type)
+    return {"message": "File received successfully", "final_filepath": filepath}
 
 
 def fileUploadMultipart(file, original_filename, request):
@@ -129,12 +144,13 @@ def fileUploadMultipart(file, original_filename, request):
     with open(temp_filepath, 'ab') as f:
         f.write(file.read())
 
+    final_filepath = None
     if is_last_chunk:
         final_filepath = os.path.join(UPLOAD_DIR, original_filename)
         os.rename(temp_filepath, final_filepath)
         print(f"File {original_filename} uploaded successfully!")
-        setTodosForFile(original_filename, file_type)
-    return "Chunk received successfully"
+        # setTodosForFile(original_filename, file_type)
+    return {"message" : "Chunk received successfully", "final_filepath": final_filepath}
 
 
 def setTodosForFile(original_filename, file_type):

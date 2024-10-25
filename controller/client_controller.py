@@ -41,7 +41,6 @@ def getUserTodos():
 def setUserTodos():
     try:
         taskResp = setTodos(request)
-        print("hello there 2",taskResp)
         responseData = {'message': 'Task Saved!',
                         'message_code': MessageCode.CREATED.value,
                         'data': taskResp}
@@ -104,6 +103,7 @@ def fileUploadTodos():
                         'message_code': MessageCode.SUCCESS.value,
                         'data': taskResp}
         response = make_response(responseData, 200)
+        return response
     except Exception:
         responseData = {'message': 'File Could not be Saved!',
                         'message_code': MessageCode.ERROR.value,
