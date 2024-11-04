@@ -112,25 +112,28 @@ def fileUploadTodos():
     return response
 
 
-@app.route('/send_file/<path:path>', methods=["GET"])
+@app.route('/send_file', methods=["POST"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
-def static_file(path):
-    try:
+def static_file():
+    # try:
+        taskRequest = request.get_json()
+        file_name = taskRequest['data']
+        print(file_name , "hello")
         userCode = str(getDataFromToken('id'))
-        is_valid = getUserFileValid(userCode, path)
+        is_valid = getUserFileValid(userCode, file_name)
         if is_valid:
-            return send_from_directory(STATIC_FOLDER, path)
+            return send_from_directory(STATIC_FOLDER, file_name.split(' | ')[0])
         else:
             responseData = {'message': 'File Could not be Retrived!',
                             'message_code': MessageCode.NOT_FOUND.value,
                             'data': ''}
             response = make_response(responseData, 404)
             return response
-    except Exception:
-        responseData = {'message': 'File Could not be Saved!',
-                        'message_code': MessageCode.ERROR.value,
-                        'data': ''}
-        response = make_response(responseData, 400)
-        return response
+    # except Exception:
+    #     responseData = {'message': 'File Could not be Saved!',
+    #                     'message_code': MessageCode.ERROR.value,
+    #                     'data': ''}
+    #     response = make_response(responseData, 400)
+    #     return response

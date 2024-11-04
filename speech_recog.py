@@ -1,19 +1,3 @@
-
-# Run in virtual environment
-# pip install jupyter-lab
-# jupyter-lab
-
-
-# !pip install torch accelerate torchaudio datasets[audio]
-# !pip install --upgrade transformers
-# !pip install soundfile
-# !pip install librosa
-# !pip install jiwer
-
-
-# pip install ipywidgets
-
-
 from IPython.display import Audio as Play_Audio
 from datasets import load_dataset
 

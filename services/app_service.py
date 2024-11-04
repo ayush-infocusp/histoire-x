@@ -2,7 +2,7 @@ from common.helper import task_to_dict, userModel_to_user
 from config.db_init import db
 from models.tasks import Task
 from models.users import User
-from common.constants.app_constant import Role, Status
+from common.constants.app_constant import Role, Status, tasksType
 from common.utils import getDataFromToken
 from speech_recog import getSpeechDetails
 import os
@@ -38,16 +38,20 @@ def getTodos(request):
 
 # set the todo item wrt the user identifer
 def setTodos(request):
-    userCode = str(getDataFromToken('id'))
-    taskRequest = request.get_json()
-    task = Task(userId=userCode,
-                task=taskRequest['task'],
-                status=taskRequest['status'])
-    db.session.add(task)
-    db.session.commit()
-    taskResp = task_to_dict(task)
-    text = getSpeechDetails()
-    return {"taskResp": taskResp, "text": text}
+    try:
+        text=None
+        userCode = str(getDataFromToken('id'))
+        taskRequest = request.get_json()
+        task = Task(userId=userCode,
+                    task=taskRequest['task'],
+                    status=taskRequest['status'])
+        db.session.add(task)
+        db.session.commit()
+        taskResp = task_to_dict(task)
+        text = getSpeechDetails()
+    except Exception:
+        print("exception")
+        return {"taskResp": taskResp, "text": text}
 
 
 # update specific todo item on the basis of task identifier
@@ -109,12 +113,14 @@ def uploadFile(request):
     text = None
     if file.filename == '':
         return 'No selected file'
+    to_save_filename = file.filename + " | TEXT :- "
     if not is_multipart:
         final_filepath = fileUploadNotMultipart(file, file.filename, file_type)
         # get speech to text
-        fileData = convert_audio_puarray(final_filepath['final_filepath'])
-        text = getSpeechDetails(fileData['audio_data'])
-        to_save_filename = file.filename + " | TEXT :- " + text['prediction']
+        if file_type == tasksType.AUDIO.value:
+            fileData = convert_audio_puarray(final_filepath['final_filepath'])
+            text = getSpeechDetails(fileData['audio_data'])
+            to_save_filename = to_save_filename + text['prediction']
         setTodosForFile(to_save_filename, file_type)
     else:
         multipart_upload_data = fileUploadMultipart(file, file.filename, request)
@@ -122,9 +128,10 @@ def uploadFile(request):
         if multipart_upload_data and is_last_chunk:
             final_filepath = multipart_upload_data['final_filepath']
             # get speech to text
-            fileData = convert_audio_puarray(final_filepath)
-            text = getSpeechDetails(fileData['audio_data'])
-            to_save_filename = file.filename + " | TEXT :- " + text['prediction']
+            if file_type == tasksType.AUDIO.value:
+                fileData = convert_audio_puarray(final_filepath)
+                text = getSpeechDetails(fileData['audio_data'])
+                to_save_filename = to_save_filename + text['prediction']
             setTodosForFile(to_save_filename, file_type)
     return {"message": 'File uploaded successfully!', "text": text}
 
@@ -165,7 +172,7 @@ def setTodosForFile(original_filename, file_type):
 
 def getUserFileValid(userCode: str, path: str):
     if userCode and path:
-        tasks = db.session.query(Task).filter(Task.userId == userCode,Task.task == path).all()
+        tasks = db.session.query(Task).filter(Task.userId == userCode , Task.task == path).all()
         if tasks:
             return True
     return False
