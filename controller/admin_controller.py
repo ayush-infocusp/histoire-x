@@ -1,12 +1,12 @@
-from app import app   # pylint: disable=import-error
-from services.app_service import get_user_data, set_user_data, delete_user_data  # pylint: disable=import-error
-from flask import request, make_response  # pylint: disable=import-error
-from flask_cors import cross_origin   # pylint: disable=import-error
-from flask_jwt_extended import jwt_required  # pylint: disable=import-error
-from common.validators.request_role_auth import role_required  # pylint: disable=import-error
-from common.constants.app_constant import Role, MessageCode  # pylint: disable=import-error
-from dataclasses import dataclass  # pylint: disable=import-error
-from common.utils import is_value_bool_true  # pylint: disable=import-error
+from app import app
+from flask import request, make_response
+from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required
+from dataclasses import dataclass
+from services.app_service import get_user_data, set_user_data, delete_user_data
+from common.validators.request_role_auth import role_required
+from common.constants.app_constant import Role, MessageCode
+from common.utils import is_value_bool_true
 
 
 @dataclass

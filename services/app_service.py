@@ -1,13 +1,14 @@
-from common.helper import task_to_dict, userModel_to_user
+import os
 from config.db_init import db
 from models.tasks import Task
 from models.users import User
-from common.constants.app_constant import Role, Status, tasksType
-from common.utils import get_data_from_token
 from speech_recog import get_speech_details
-import os
 from common.audio_helper import convert_audio_puarray
-import io
+from common.helper import task_to_dict, userModel_to_user
+from common.utils import get_data_from_token
+from common.constants.app_constant import Role, Status, tasksType
+from common.models.request_model import GetTodosRequest, SetTodosRequest
+
 
 UPLOAD_DIR = "upload_data"
 # Directory to store temporary files
@@ -17,12 +18,12 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 # get the todos on the basis of the user
-def get_todos(request):
+def get_todos(request: GetTodosRequest):
     """get the todos data on per user basis"""
-    page_number = int(request.args.get('pageNo', 1))
-    page_size = int(request.args.get('page_size', 10))
+    page_number = request.pageNo
+    page_size = request.pageSize
     user_code = str(get_data_from_token('id'))
-    status = request.args.get('status')
+    status = request.status
     if status and status not in [s.value for s in Status]:
         return Exception("status not acceptable")
     offset_value = (page_number - 1) * page_size
@@ -38,22 +39,20 @@ def get_todos(request):
 
 
 # set the todo item wrt the user identifer
-def set_todos(request):
+def set_todos(request: SetTodosRequest):
     """set the todos for the user"""
     try:
-        text = None
         user_code = str(get_data_from_token('id'))
-        task_request = request.get_json()
         task = Task(userId=user_code,
-                    task=task_request['task'],
-                    status=task_request['status'])
+                    task=request.task,
+                    status=request.status)
         db.session.add(task)
         db.session.commit()
         task_response = task_to_dict(task)
-        text = getSpeechDetails()
+        # text = get_speech_details()
     except Exception:
         print("exception")
-    return {"task_response": task_response, "text": text}
+    return {"task_response": task_response, "text": request.task}
 
 
 # update specific todo item on the basis of task identifier
@@ -61,7 +60,9 @@ def update_todos(request):
     """update specific todo item on the basis of task identifier"""
     task_request = request.get_json()
     user_code = str(get_data_from_token('id'))
-    task = db.session.query(Task).filter(Task.id == task_request['id'], Task.userId == user_code).one_or_none()
+    task = db.session.query(Task).filter(
+        Task.id == task_request['id'],
+        Task.userId == user_code).one_or_none()
     if not task:
         return Exception("selected data is invalid")
     task.status = task_request['status']
@@ -111,7 +112,7 @@ def delete_user_data(user_id):
 
 
 def upload_file(request):
-    """"""
+    """upload file and save in local"""
     is_multipart = request.form.get('is_multipart') == 'true'
     file_type = request.form.get('file_type')
     if "file_chunk" not in request.files:
@@ -123,34 +124,47 @@ def upload_file(request):
     # to save file with specific name
     to_save_filename = file.filename + " | TEXT :- "
     if not is_multipart:
-        final_filepath = file_upload_not_multipart(
-            file, file.filename, file_type)
-        # get speech to text
-        if file_type == tasksType.AUDIO.value:
-            file_data = convert_audio_puarray(final_filepath['final_filepath'])
-            text = get_speech_details(file_data['audio_data'])
-            to_save_filename = to_save_filename + text['prediction']
-        set_todos_for_file(to_save_filename, file_type)
+        text = text_to_speech_single_part(file, file_type, to_save_filename)
     else:
-        multipart_upload_data = file_upload_multipart(
-            file, file.filename, request)
-        is_last_chunk = request.form.get(
-            'is_last_chunk', 'false').lower() == 'true'
-        # if multipart upload and is last chunk and save as final part data
-        if multipart_upload_data and is_last_chunk:
-            final_filepath = multipart_upload_data['final_filepath']
-            # get speech to text if file type is audio
-            if file_type == tasksType.AUDIO.value:
-                file_data = convert_audio_puarray(final_filepath)
-                text = get_speech_details(file_data['audio_data'])
-                to_save_filename = to_save_filename + text['prediction']
-            get_user_file_valid(to_save_filename, file_type)
+        text = file_upload_not_multipart(file, request, file_type, to_save_filename)
     return {
         "message": 'File uploaded successfully!',
-        "text": text}
+        "text": text
+        }
 
 
-def file_upload_not_multipart(file, file_name, file_type):
+def text_to_speech_single_part(file, file_type, to_save_filename):
+    """text to speech processor for speech of single part file"""
+    final_filepath = file_upload_not_multipart(
+            file, file.filename)
+    # get speech to text
+    if file_type == tasksType.AUDIO.value:
+        file_data = convert_audio_puarray(final_filepath['final_filepath'])
+        text = get_speech_details(file_data['audio_data'])
+        to_save_filename = to_save_filename + text['prediction']
+    set_todos_for_file(to_save_filename, file_type)
+    return text
+
+
+def text_to_speech_multipart(file, request, file_type, to_save_filename):
+    """text to speech processor for speech of multi part file"""
+    multipart_upload_data = file_upload_multipart(
+        file, file.filename, request)
+    is_last_chunk = request.form.get(
+        'is_last_chunk', 'false').lower() == 'true'
+    # if multipart upload and is last chunk and save as final part data
+    if multipart_upload_data and is_last_chunk:
+        # get speech to text if file type is audio
+        if file_type == tasksType.AUDIO.value:
+            final_filepath = multipart_upload_data['final_filepath']
+            file_data = convert_audio_puarray(final_filepath)
+            text = get_speech_details(file_data['audio_data'])
+            to_save_filename = to_save_filename + text['prediction']
+        get_user_file_valid(to_save_filename, file_type)
+    return text
+
+
+def file_upload_not_multipart(file, file_name):
     """file upload as single part data"""
     filepath = os.path.join(UPLOAD_DIR, f'{file_name}')
     file.save(filepath)
@@ -178,7 +192,8 @@ def file_upload_multipart(file, original_filename, request):
         print(f"File {original_filename} uploaded successfully!")
     return {
         "message": "Chunk received successfully",
-        "final_filepath": final_filepath}
+        "final_filepath": final_filepath
+        }
 
 
 def set_todos_for_file(original_filename, file_type):

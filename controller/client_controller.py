@@ -1,11 +1,16 @@
 from app import app  # pylint: disable=import-error
-from services.app_service import get_todos, set_todos, update_todos, delete_todos, upload_file, get_user_file_valid
 from flask import request, make_response, send_from_directory
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
+from flask_pydantic import validate
+
+from services.app_service import get_todos, set_todos, update_todos, delete_todos, upload_file, get_user_file_valid
+
+from common.utils import get_data_from_token
 from common.validators.request_role_auth import role_required
 from common.constants.app_constant import Role, MessageCode
-from common.utils import get_data_from_token
+from common.models.request_model import GetTodosRequest, SetTodosRequest
+
 
 STATIC_FOLDER = 'upload_data'
 
@@ -14,10 +19,11 @@ STATIC_FOLDER = 'upload_data'
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
-def get_user_todos():
+@validate()
+def get_user_todos(query: GetTodosRequest):
     """get the todos of users"""
     try:
-        tasks_as_dicts = get_todos(request)
+        tasks_as_dicts = get_todos(query)
         if not tasks_as_dicts:
             response_data = {
                 'message': 'Task Received!',
@@ -42,10 +48,11 @@ def get_user_todos():
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
-def set_user_todos():
+@validate()
+def set_user_todos(body: SetTodosRequest):
     """set user todo data"""
     try:
-        task_response = set_todos(request)
+        task_response = set_todos(body)
         response_data = {
             'message': 'Task Saved!',
             'message_code': MessageCode.CREATED.value,
@@ -147,11 +154,10 @@ def static_file():
                 'message_code': MessageCode.NOT_FOUND.value,
                 'data': ''}
             response = make_response(response_data, 404)
-            return response
     except Exception:
         response_data = {
             'message': 'File Could not be Saved!',
             'message_code': MessageCode.ERROR.value,
             'data': ''}
         response = make_response(response_data, 400)
-        return response
+    return response
