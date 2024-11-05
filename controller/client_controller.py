@@ -1,11 +1,11 @@
-from app import app
-from services.app_service import getTodos, setTodos, updateTodos, deleteTodos, uploadFile, getUserFileValid
+from app import app  # pylint: disable=import-error
+from services.app_service import get_todos, set_todos, update_todos, delete_todos, upload_file, get_user_file_valid
 from flask import request, make_response, send_from_directory
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
 from common.validators.request_role_auth import role_required
 from common.constants.app_constant import Role, MessageCode
-from common.utils import getDataFromToken
+from common.utils import get_data_from_token
 
 STATIC_FOLDER = 'upload_data'
 
@@ -14,23 +14,27 @@ STATIC_FOLDER = 'upload_data'
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
-def getUserTodos():
+def get_user_todos():
+    """get the todos of users"""
     try:
-        tasks_as_dicts = getTodos(request)
+        tasks_as_dicts = get_todos(request)
         if not tasks_as_dicts:
-            responseData = {'message': 'Task Received!',
-                            'message_code': MessageCode.NO_DATA.value,
-                            'data': tasks_as_dicts}
+            response_data = {
+                'message': 'Task Received!',
+                'message_code': MessageCode.NO_DATA.value,
+                'data': tasks_as_dicts}
         else:
-            responseData = {'message': 'Task Received!',
-                            'message_code': MessageCode.SUCCESS.value,
-                            'data': tasks_as_dicts}
-        response = make_response(responseData, 200)
+            response_data = {
+                'message': 'Task Received!',
+                'message_code': MessageCode.SUCCESS.value,
+                'data': tasks_as_dicts}
+        response = make_response(response_data, 200)
     except Exception:
-        responseData = {'message': 'Task could not be Retrived!',
-                        'message_code': MessageCode.ERROR.value,
-                        'data': str(tasks_as_dicts)}
-        response = make_response(responseData, 400)
+        response_data = {
+            'message': 'Task could not be Retrived!',
+            'message_code': MessageCode.ERROR.value,
+            'data': str(tasks_as_dicts)}
+        response = make_response(response_data, 400)
     return response
 
 
@@ -38,18 +42,21 @@ def getUserTodos():
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
-def setUserTodos():
+def set_user_todos():
+    """set user todo data"""
     try:
-        taskResp = setTodos(request)
-        responseData = {'message': 'Task Saved!',
-                        'message_code': MessageCode.CREATED.value,
-                        'data': taskResp}
-        response = make_response(responseData, 201)
+        task_response = set_todos(request)
+        response_data = {
+            'message': 'Task Saved!',
+            'message_code': MessageCode.CREATED.value,
+            'data': task_response}
+        response = make_response(response_data, 201)
     except Exception:
-        responseData = {'message': 'Task Could not be saved!',
-                        'message_code': MessageCode.ERROR.value,
-                        'data': taskResp}
-        response = make_response(responseData, 400)
+        response_data = {
+            'message': 'Task Could not be saved!',
+            'message_code': MessageCode.ERROR.value,
+            'data': task_response}
+        response = make_response(response_data, 400)
     return response
 
 
@@ -57,19 +64,21 @@ def setUserTodos():
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
-def updateUserTodos():
+def update_user_todos():
+    """update the todos of the user"""
     try:
-        taskResp = updateTodos(request)
-        print(taskResp)
-        responseData = {'message': 'Task Updated!',
-                        'message_code': MessageCode.ACCEPTED.value,
-                        'data': taskResp}
-        response = make_response(responseData, 202)
+        task_response = update_todos(request)
+        response_data = {
+            'message': 'Task Updated!',
+            'message_code': MessageCode.ACCEPTED.value,
+            'data': task_response}
+        response = make_response(response_data, 202)
     except Exception:
-        responseData = {'message': 'Task Could not be updated!',
-                        'message_code': MessageCode.ERROR.value,
-                        'data': str(taskResp)}
-        response = make_response(responseData, 400)
+        response_data = {
+            'message': 'Task Could not be updated!',
+            'message_code': MessageCode.ERROR.value,
+            'data': str(task_response)}
+        response = make_response(response_data, 400)
     return response
 
 
@@ -77,18 +86,21 @@ def updateUserTodos():
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
-def deleteUserTodos(task_id):
+def delete_user_todos(task_id):
+    """delete the todo of the user"""
     try:
-        taskResp = deleteTodos(task_id)
-        responseData = {'message': 'Task Deleted!',
-                        'message_code': MessageCode.SUCCESS.value,
-                        'data': ''}
-        response = make_response(responseData, 200)
+        task_response = delete_todos(task_id)
+        response_data = {
+            'message': 'Task Deleted!',
+            'message_code': MessageCode.SUCCESS.value,
+            'data': task_response}
+        response = make_response(response_data, 200)
     except Exception:
-        responseData = {'message': 'Task Could not be deleted!',
-                        'message_code': MessageCode.ERROR.value,
-                        'data': taskResp}
-        response = make_response(responseData, 400)
+        response_data = {
+            'message': 'Task Could not be deleted!',
+            'message_code': MessageCode.ERROR.value,
+            'data': ''}
+        response = make_response(response_data, 400)
     return response
 
 
@@ -96,19 +108,22 @@ def deleteUserTodos(task_id):
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
-def fileUploadTodos():
+def file_upload_todos():
+    """upload file into the todos"""
     try:
-        taskResp = uploadFile(request)
-        responseData = {'message': 'File saved!',
-                        'message_code': MessageCode.SUCCESS.value,
-                        'data': taskResp}
-        response = make_response(responseData, 200)
+        task_response = upload_file(request)
+        response_data = {
+            'message': 'File saved!',
+            'message_code': MessageCode.SUCCESS.value,
+            'data': task_response}
+        response = make_response(response_data, 200)
         return response
     except Exception:
-        responseData = {'message': 'File Could not be Saved!',
-                        'message_code': MessageCode.ERROR.value,
-                        'data': ''}
-        response = make_response(responseData, 400)
+        response_data = {
+            'message': 'File Could not be Saved!',
+            'message_code': MessageCode.ERROR.value,
+            'data': ''}
+        response = make_response(response_data, 400)
     return response
 
 
@@ -117,23 +132,26 @@ def fileUploadTodos():
 @jwt_required()
 @role_required(Role.CLIENT.value)
 def static_file():
-    # try:
-        taskRequest = request.get_json()
-        file_name = taskRequest['data']
-        print(file_name , "hello")
-        userCode = str(getDataFromToken('id'))
-        is_valid = getUserFileValid(userCode, file_name)
+    """get the static file data"""
+    try:
+        task_request = request.get_json()
+        file_name = task_request['data']
+        user_code = str(get_data_from_token('id'))
+        is_valid = get_user_file_valid(user_code, file_name)
         if is_valid:
-            return send_from_directory(STATIC_FOLDER, file_name.split(' | ')[0])
+            return send_from_directory(STATIC_FOLDER,
+                                       file_name.split(' | ')[0])
         else:
-            responseData = {'message': 'File Could not be Retrived!',
-                            'message_code': MessageCode.NOT_FOUND.value,
-                            'data': ''}
-            response = make_response(responseData, 404)
+            response_data = {
+                'message': 'File Could not be Retrived!',
+                'message_code': MessageCode.NOT_FOUND.value,
+                'data': ''}
+            response = make_response(response_data, 404)
             return response
-    # except Exception:
-    #     responseData = {'message': 'File Could not be Saved!',
-    #                     'message_code': MessageCode.ERROR.value,
-    #                     'data': ''}
-    #     response = make_response(responseData, 400)
-    #     return response
+    except Exception:
+        response_data = {
+            'message': 'File Could not be Saved!',
+            'message_code': MessageCode.ERROR.value,
+            'data': ''}
+        response = make_response(response_data, 400)
+        return response

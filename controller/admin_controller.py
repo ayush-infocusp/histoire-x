@@ -1,16 +1,17 @@
-from app import app
-from services.app_service import getUserData, setUserData, deleteUserData
-from flask import request, make_response
-from flask_cors import cross_origin
-from flask_jwt_extended import jwt_required
-from common.validators.request_role_auth import role_required
-from common.constants.app_constant import Role, MessageCode
-from dataclasses import dataclass
-from common.utils import is_value_bool_true
+from app import app   # pylint: disable=import-error
+from services.app_service import get_user_data, set_user_data, delete_user_data  # pylint: disable=import-error
+from flask import request, make_response  # pylint: disable=import-error
+from flask_cors import cross_origin   # pylint: disable=import-error
+from flask_jwt_extended import jwt_required  # pylint: disable=import-error
+from common.validators.request_role_auth import role_required  # pylint: disable=import-error
+from common.constants.app_constant import Role, MessageCode  # pylint: disable=import-error
+from dataclasses import dataclass  # pylint: disable=import-error
+from common.utils import is_value_bool_true  # pylint: disable=import-error
 
 
 @dataclass
 class GetUserRequest:
+    """request structure for get request to get user data"""
     page_no: int
     page_size: int
     deleted: bool
@@ -20,27 +21,34 @@ class GetUserRequest:
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.ADMIN.value)
-def getUsers():
+def get_users():
+    """get users data"""
     try:
-        pageNumber: int = request.args.get('pageNo', 1, type=int)
-        pageSize: int = request.args.get('pageSize', 10, type=int)
+        page_number: int = request.args.get('pageNo', 1, type=int)
+        page_size: int = request.args.get('pageSize', 10, type=int)
         delete: bool = request.args.get('deleted', default=False,
                                         type=is_value_bool_true)
-        users_as_dicts = getUserData(pageNumber, pageSize, delete)
+        users_as_dicts = get_user_data(page_number, page_size, delete)
         if not users_as_dicts:
-            responseData = {'message': 'Task Received!',
-                            'message_code': MessageCode.NO_DATA.value,
-                            'data': users_as_dicts}
+            response_data = {
+                'message': 'Task Received!',
+                'message_code': MessageCode.NO_DATA.value,
+                'data': users_as_dicts
+                }
         else:
-            responseData = {'message': 'Task Received!',
-                            'message_code': MessageCode.SUCCESS.value,
-                            'data': users_as_dicts}
-        response = make_response(responseData, 200)
+            response_data = {
+                'message': 'Task Received!',
+                'message_code': MessageCode.SUCCESS.value,
+                'data': users_as_dicts
+                }
+        response = make_response(response_data, 200)
     except Exception:
-        responseData = {'message': 'Task could not be Retrived!',
-                        'message_code': MessageCode.NOT_FOUND.value,
-                        'data': ''}
-        response = make_response(responseData, 400)
+        response_data = {
+            'message': 'Task could not be Retrived!',
+            'message_code': MessageCode.NOT_FOUND.value,
+            'data': ''
+            }
+        response = make_response(response_data, 400)
     return response
 
 
@@ -48,19 +56,26 @@ def getUsers():
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.ADMIN.value)
-def setUsers():
+def set_users():
+    """update and set data of users"""
     try:
-        updateRequest = request.get_json()
-        userResp = setUserData(updateRequest['userId'], updateRequest['role'], updateRequest['deleted'])
-        responseData = {'message': 'Task Saved!',
-                        'message_code': MessageCode.ACCEPTED.value,
-                        'data': userResp}
-        response = make_response(responseData, 201)
+        update_request = request.get_json()
+        user_resp = set_user_data(
+            update_request['userId'], update_request['role'],
+            update_request['deleted'])
+        response_data = {
+            'message': 'Task Saved!',
+            'message_code': MessageCode.ACCEPTED.value,
+            'data': user_resp
+            }
+        response = make_response(response_data, 201)
     except Exception:
-        responseData = {'message': 'Task Could not be saved!',
-                        'message_code': MessageCode.ERROR.value,
-                        'data': ''}
-        response = make_response(responseData, 400)
+        response_data = {
+            'message': 'Task Could not be saved!',
+            'message_code': MessageCode.ERROR.value,
+            'data': ''
+            }
+        response = make_response(response_data, 400)
     return response
 
 
@@ -68,16 +83,20 @@ def setUsers():
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.ADMIN.value)
-def deleteUsers(user_id):
+def delete_users(user_id):
+    """delete users data on the basis of user identifier"""
     try:
-        deleteUserData(user_id)
-        responseData = {'message': 'User & Tasks Deleted!',
-                        'message_code': MessageCode.SUCCESS.value,
-                        'data': ''}
-        response = make_response(responseData, 200)
+        delete_user_data(user_id)
+        response_data = {
+            'message': 'User & Tasks Deleted!',
+            'message_code': MessageCode.SUCCESS.value,
+            'data': ''
+            }
+        response = make_response(response_data, 200)
     except Exception:
-        responseData = {'message': 'User Could not be deleted!',
-                        'message_code': MessageCode.ERROR.value,
-                        'data': ''}
-        response = make_response(responseData, 400)
+        response_data = {
+            'message': 'User Could not be deleted!',
+            'message_code': MessageCode.ERROR.value,
+            'data': ''}
+        response = make_response(response_data, 400)
     return response

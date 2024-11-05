@@ -3,8 +3,8 @@ from config.db_init import db
 from models.tasks import Task
 from models.users import User
 from common.constants.app_constant import Role, Status, tasksType
-from common.utils import getDataFromToken
-from speech_recog import getSpeechDetails
+from common.utils import get_data_from_token
+from speech_recog import get_speech_details
 import os
 from common.audio_helper import convert_audio_puarray
 import io
@@ -17,73 +17,79 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 # get the todos on the basis of the user
-def getTodos(request):
-    pageNumber = int(request.args.get('pageNo', 1))
-    pageSize = int(request.args.get('pageSize', 10))
-    userCode = str(getDataFromToken('id'))
+def get_todos(request):
+    """get the todos data on per user basis"""
+    page_number = int(request.args.get('pageNo', 1))
+    page_size = int(request.args.get('page_size', 10))
+    user_code = str(get_data_from_token('id'))
     status = request.args.get('status')
     if status and status not in [s.value for s in Status]:
         return Exception("status not acceptable")
-    offset_value = (pageNumber - 1) * pageSize
+    offset_value = (page_number - 1) * page_size
     if status:
-        stmt = db.select(Task).filter_by(userId=userCode,
+        stmt = db.select(Task).filter_by(userId=user_code,
                                          status=status,
-                                         deleted=False).limit(pageSize).offset(offset_value)
+                                         deleted=False).limit(page_size).offset(offset_value)
     else:
-        stmt = db.select(Task).filter_by(userId=userCode, deleted=False).limit(pageSize).offset(offset_value)
-    taskLists = db.session.execute(stmt).scalars().all()
-    tasks_as_dicts = [task_to_dict(task) for task in taskLists]
+        stmt = db.select(Task).filter_by(userId=user_code, deleted=False).limit(page_size).offset(offset_value)
+    task_lists = db.session.execute(stmt).scalars().all()
+    tasks_as_dicts = [task_to_dict(task) for task in task_lists]
     return tasks_as_dicts
 
 
 # set the todo item wrt the user identifer
-def setTodos(request):
+def set_todos(request):
+    """set the todos for the user"""
     try:
-        text=None
-        userCode = str(getDataFromToken('id'))
-        taskRequest = request.get_json()
-        task = Task(userId=userCode,
-                    task=taskRequest['task'],
-                    status=taskRequest['status'])
+        text = None
+        user_code = str(get_data_from_token('id'))
+        task_request = request.get_json()
+        task = Task(userId=user_code,
+                    task=task_request['task'],
+                    status=task_request['status'])
         db.session.add(task)
         db.session.commit()
-        taskResp = task_to_dict(task)
+        task_response = task_to_dict(task)
         text = getSpeechDetails()
     except Exception:
         print("exception")
-        return {"taskResp": taskResp, "text": text}
+    return {"task_response": task_response, "text": text}
 
 
 # update specific todo item on the basis of task identifier
-def updateTodos(request):
-    taskRequest = request.get_json()
-    userCode = str(getDataFromToken('id'))
-    task = db.session.query(Task).filter(Task.id == taskRequest['id'], Task.userId == userCode).one_or_none()
+def update_todos(request):
+    """update specific todo item on the basis of task identifier"""
+    task_request = request.get_json()
+    user_code = str(get_data_from_token('id'))
+    task = db.session.query(Task).filter(Task.id == task_request['id'], Task.userId == user_code).one_or_none()
     if not task:
         return Exception("selected data is invalid")
-    task.status = taskRequest['status']
+    task.status = task_request['status']
     db.session.commit()
-    taskResp = task_to_dict(task)
-    return taskResp
+    task_response = task_to_dict(task)
+    return task_response
 
 
 # soft delete specific todo item on the basis of task identifier
-def deleteTodos(task_id):
+def delete_todos(task_id):
+    """delete todos with soft delete on the basis of task id"""
     task = db.session.query(Task).filter(Task.id == task_id).one()
     task.deleted = True
     db.session.commit()
 
 
 # get the users on the basis of the roles and deleted
-def getUserData(pageNumber: int, pageSize: int, delete: bool):
-    offset_value = (pageNumber - 1) * pageSize
-    user_lists = User.getUsersByStatus(pageSize, offset_value, delete)
+def get_user_data(page_number: int, page_size: int, delete: bool):
+    """get user data on the basis of delted filter"""
+    offset_value = (page_number - 1) * page_size
+    user_lists = User.get_users_by_status(page_size, offset_value, delete)
     user_dicts = [userModel_to_user(user) for user in user_lists]
     return user_dicts
 
 
-def setUserData(user_id: int, role: Role, deleted: bool):
-    user = User.getUserById(user_id)
+def set_user_data(user_id: int, role: Role, deleted: bool):
+    """set user data"""
+    user = User.get_user_by_id(user_id)
     if user:
         user.role = role
         user.deleted = deleted
@@ -93,8 +99,9 @@ def setUserData(user_id: int, role: Role, deleted: bool):
         return None
 
 
-def deleteUserData(user_id):
-    user = User.getUserById(user_id)
+def delete_user_data(user_id):
+    """delete user data on the basis of identifer"""
+    user = User.get_user_by_id(user_id)
     if user:
         user.deleted = True
         tasks = db.session.query(Task).filter(Task.userId == user_id).all()
@@ -103,8 +110,8 @@ def deleteUserData(user_id):
         db.session.commit()
 
 
-def uploadFile(request):
-    print(request.form.get('is_multipart'))
+def upload_file(request):
+    """"""
     is_multipart = request.form.get('is_multipart') == 'true'
     file_type = request.form.get('file_type')
     if "file_chunk" not in request.files:
@@ -113,41 +120,54 @@ def uploadFile(request):
     text = None
     if file.filename == '':
         return 'No selected file'
+    # to save file with specific name
     to_save_filename = file.filename + " | TEXT :- "
     if not is_multipart:
-        final_filepath = fileUploadNotMultipart(file, file.filename, file_type)
+        final_filepath = file_upload_not_multipart(
+            file, file.filename, file_type)
         # get speech to text
         if file_type == tasksType.AUDIO.value:
-            fileData = convert_audio_puarray(final_filepath['final_filepath'])
-            text = getSpeechDetails(fileData['audio_data'])
+            file_data = convert_audio_puarray(final_filepath['final_filepath'])
+            text = get_speech_details(file_data['audio_data'])
             to_save_filename = to_save_filename + text['prediction']
-        setTodosForFile(to_save_filename, file_type)
+        set_todos_for_file(to_save_filename, file_type)
     else:
-        multipart_upload_data = fileUploadMultipart(file, file.filename, request)
-        is_last_chunk = request.form.get('is_last_chunk', 'false').lower() == 'true'
+        multipart_upload_data = file_upload_multipart(
+            file, file.filename, request)
+        is_last_chunk = request.form.get(
+            'is_last_chunk', 'false').lower() == 'true'
+        # if multipart upload and is last chunk and save as final part data
         if multipart_upload_data and is_last_chunk:
             final_filepath = multipart_upload_data['final_filepath']
-            # get speech to text
+            # get speech to text if file type is audio
             if file_type == tasksType.AUDIO.value:
-                fileData = convert_audio_puarray(final_filepath)
-                text = getSpeechDetails(fileData['audio_data'])
+                file_data = convert_audio_puarray(final_filepath)
+                text = get_speech_details(file_data['audio_data'])
                 to_save_filename = to_save_filename + text['prediction']
-            setTodosForFile(to_save_filename, file_type)
-    return {"message": 'File uploaded successfully!', "text": text}
+            get_user_file_valid(to_save_filename, file_type)
+    return {
+        "message": 'File uploaded successfully!',
+        "text": text}
 
 
-def fileUploadNotMultipart(file, fileName, file_type):
-    filepath = os.path.join(UPLOAD_DIR, f'{fileName}')
+def file_upload_not_multipart(file, file_name, file_type):
+    """file upload as single part data"""
+    filepath = os.path.join(UPLOAD_DIR, f'{file_name}')
     file.save(filepath)
-    # setTodosForFile(fileName, file_type)
-    return {"message": "File received successfully", "final_filepath": filepath}
+    return {
+        "message": "File received successfully",
+        "final_filepath": filepath
+        }
 
 
-def fileUploadMultipart(file, original_filename, request):
+def file_upload_multipart(file, original_filename, request):
+    """file upload as multi part data """
     file_id = request.form.get('file_id')
-    is_last_chunk = request.form.get('is_last_chunk', 'false').lower() == 'true'
-    file_type = request.form.get('file_type')
-    temp_filepath = os.path.join(UPLOAD_DIR, f"{file_id}_{original_filename}.part")
+    is_last_chunk = request.form.get(
+        'is_last_chunk', 'false').lower() == 'true'
+    # file_type = request.form.get('file_type')
+    temp_filepath = os.path.join(
+        UPLOAD_DIR, f"{file_id}_{original_filename}.part")
     with open(temp_filepath, 'ab') as f:
         f.write(file.read())
 
@@ -156,13 +176,15 @@ def fileUploadMultipart(file, original_filename, request):
         final_filepath = os.path.join(UPLOAD_DIR, original_filename)
         os.rename(temp_filepath, final_filepath)
         print(f"File {original_filename} uploaded successfully!")
-        # setTodosForFile(original_filename, file_type)
-    return {"message" : "Chunk received successfully", "final_filepath": final_filepath}
+    return {
+        "message": "Chunk received successfully",
+        "final_filepath": final_filepath}
 
 
-def setTodosForFile(original_filename, file_type):
-    userCode = str(getDataFromToken('id'))
-    task = Task(userId=userCode,
+def set_todos_for_file(original_filename, file_type):
+    """set the todos for the file"""
+    user_code = str(get_data_from_token('id'))
+    task = Task(userId=user_code,
                 task=original_filename,
                 status=Status.PENDING.value,
                 type=file_type)
@@ -170,9 +192,11 @@ def setTodosForFile(original_filename, file_type):
     db.session.commit()
 
 
-def getUserFileValid(userCode: str, path: str):
-    if userCode and path:
-        tasks = db.session.query(Task).filter(Task.userId == userCode , Task.task == path).all()
+def get_user_file_valid(user_code: str, path: str):
+    """get if the file requested by the user is valid"""
+    if user_code and path:
+        tasks = db.session.query(Task).filter(
+            Task.userId == user_code, Task.task == path).all()
         if tasks:
             return True
     return False

@@ -2,6 +2,6 @@ from app import app
 
 
 @app.after_request
-def setupResponseHeaders(response):
+def setup_response_headers(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
