@@ -8,6 +8,8 @@ from common.helper import task_to_dict, userModel_to_user
 from common.utils import get_data_from_token
 from common.constants.app_constant import Role, Status, tasksType
 from common.models.request_model import GetTodosRequest, SetTodosRequest
+from werkzeug.datastructures import FileStorage
+
 
 
 UPLOAD_DIR = "upload_data"
@@ -72,7 +74,7 @@ def update_todos(request):
 
 
 # soft delete specific todo item on the basis of task identifier
-def delete_todos(task_id):
+def delete_todos(task_id: int):
     """delete todos with soft delete on the basis of task id"""
     task = db.session.query(Task).filter(Task.id == task_id).one()
     task.deleted = True
@@ -100,7 +102,7 @@ def set_user_data(user_id: int, role: Role, deleted: bool):
         return None
 
 
-def delete_user_data(user_id):
+def delete_user_data(user_id: int):
     """delete user data on the basis of identifer"""
     user = User.get_user_by_id(user_id)
     if user:
@@ -118,6 +120,7 @@ def upload_file(request):
     if "file_chunk" not in request.files:
         return 'No file part!'
     file = request.files['file_chunk']
+    print("hello", type(file))
     text = None
     if file.filename == '':
         return 'No selected file'
@@ -133,7 +136,7 @@ def upload_file(request):
         }
 
 
-def text_to_speech_single_part(file, file_type, to_save_filename):
+def text_to_speech_single_part(file: FileStorage, file_type: str, to_save_filename: str):
     """text to speech processor for speech of single part file"""
     final_filepath = file_upload_not_multipart(
             file, file.filename)
@@ -146,7 +149,7 @@ def text_to_speech_single_part(file, file_type, to_save_filename):
     return text
 
 
-def text_to_speech_multipart(file, request, file_type, to_save_filename):
+def text_to_speech_multipart(file: FileStorage, request, file_type: str, to_save_filename: str):
     """text to speech processor for speech of multi part file"""
     multipart_upload_data = file_upload_multipart(
         file, file.filename, request)
@@ -164,7 +167,7 @@ def text_to_speech_multipart(file, request, file_type, to_save_filename):
     return text
 
 
-def file_upload_not_multipart(file, file_name):
+def file_upload_not_multipart(file: FileStorage, file_name: str):
     """file upload as single part data"""
     filepath = os.path.join(UPLOAD_DIR, f'{file_name}')
     file.save(filepath)
@@ -174,7 +177,7 @@ def file_upload_not_multipart(file, file_name):
         }
 
 
-def file_upload_multipart(file, original_filename, request):
+def file_upload_multipart(file: FileStorage, original_filename: str, request):
     """file upload as multi part data """
     file_id = request.form.get('file_id')
     is_last_chunk = request.form.get(
@@ -196,7 +199,7 @@ def file_upload_multipart(file, original_filename, request):
         }
 
 
-def set_todos_for_file(original_filename, file_type):
+def set_todos_for_file(original_filename: str, file_type: str):
     """set the todos for the file"""
     user_code = str(get_data_from_token('id'))
     task = Task(userId=user_code,
