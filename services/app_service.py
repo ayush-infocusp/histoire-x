@@ -129,7 +129,7 @@ def upload_file(request):
     if not is_multipart:
         text = text_to_speech_single_part(file, file_type, to_save_filename)
     else:
-        text = file_upload_not_multipart(file, request, file_type, to_save_filename)
+        text = text_to_speech_multipart(file, request, file_type, to_save_filename)
     return {
         "message": 'File uploaded successfully!',
         "text": text
@@ -138,6 +138,7 @@ def upload_file(request):
 
 def text_to_speech_single_part(file: FileStorage, file_type: str, to_save_filename: str):
     """text to speech processor for speech of single part file"""
+    text = None
     final_filepath = file_upload_not_multipart(
             file, file.filename)
     # get speech to text
@@ -151,6 +152,7 @@ def text_to_speech_single_part(file: FileStorage, file_type: str, to_save_filena
 
 def text_to_speech_multipart(file: FileStorage, request, file_type: str, to_save_filename: str):
     """text to speech processor for speech of multi part file"""
+    text = None
     multipart_upload_data = file_upload_multipart(
         file, file.filename, request)
     is_last_chunk = request.form.get(
