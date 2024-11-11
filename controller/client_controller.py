@@ -10,6 +10,7 @@ from common.utils import get_data_from_token
 from common.validators.request_role_auth import role_required
 from common.constants.app_constant import Role, MessageCode
 from common.models.request_model import GetTodosRequest, SetTodosRequest
+from common.common_exception import CommonAppException
 
 
 STATIC_FOLDER = 'upload_data'
@@ -36,11 +37,7 @@ def get_user_todos(query: GetTodosRequest):
                 'data': tasks_as_dicts}
         response = make_response(response_data, 200)
     except Exception:
-        response_data = {
-            'message': 'Task could not be Retrived!',
-            'message_code': MessageCode.ERROR.value,
-            'data': str(tasks_as_dicts)}
-        response = make_response(response_data, 400)
+        raise CommonAppException('Task could not be Retrived!', status_code=400)
     return response
 
 
@@ -59,11 +56,7 @@ def set_user_todos(body: SetTodosRequest):
             'data': task_response}
         response = make_response(response_data, 201)
     except Exception:
-        response_data = {
-            'message': 'Task Could not be saved!',
-            'message_code': MessageCode.ERROR.value,
-            'data': task_response}
-        response = make_response(response_data, 400)
+        raise CommonAppException('Task Could not be saved!', status_code=400)
     return response
 
 
@@ -81,11 +74,7 @@ def update_user_todos():
             'data': task_response}
         response = make_response(response_data, 202)
     except Exception:
-        response_data = {
-            'message': 'Task Could not be updated!',
-            'message_code': MessageCode.ERROR.value,
-            'data': str(task_response)}
-        response = make_response(response_data, 400)
+        raise CommonAppException('Task Could not be updated!', status_code=400)
     return response
 
 
@@ -103,11 +92,7 @@ def delete_user_todos(task_id):
             'data': task_response}
         response = make_response(response_data, 200)
     except Exception:
-        response_data = {
-            'message': 'Task Could not be deleted!',
-            'message_code': MessageCode.ERROR.value,
-            'data': ''}
-        response = make_response(response_data, 400)
+        raise CommonAppException('Task Could not be deleted!', status_code=400)
     return response
 
 
@@ -124,13 +109,8 @@ def file_upload_todos():
             'message_code': MessageCode.SUCCESS.value,
             'data': task_response}
         response = make_response(response_data, 200)
-        return response
     except Exception:
-        response_data = {
-            'message': 'File Could not be Saved!',
-            'message_code': MessageCode.ERROR.value,
-            'data': ''}
-        response = make_response(response_data, 400)
+        raise CommonAppException('File Could not be Saved!', status_code=400)
     return response
 
 
@@ -149,15 +129,6 @@ def static_file():
             return send_from_directory(STATIC_FOLDER,
                                        file_name.split(' | ')[0])
         else:
-            response_data = {
-                'message': 'File Could not be Retrived!',
-                'message_code': MessageCode.NOT_FOUND.value,
-                'data': ''}
-            response = make_response(response_data, 404)
+            raise CommonAppException('File Could not be Retrived!', status_code=400)
     except Exception:
-        response_data = {
-            'message': 'File Could not be Saved!',
-            'message_code': MessageCode.ERROR.value,
-            'data': ''}
-        response = make_response(response_data, 400)
-    return response
+        raise CommonAppException('File Could not be Retrived!', status_code=400)
