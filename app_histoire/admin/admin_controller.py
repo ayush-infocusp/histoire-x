@@ -1,4 +1,4 @@
-from app import app
+from app_histoire.admin import bp
 from flask import request, make_response
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
@@ -17,7 +17,7 @@ class GetUserRequest:
     deleted: bool
 
 
-@app.route('/getUsers', methods=["GET"])
+@bp.route('/getUsers', methods=["GET"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.ADMIN.value)
@@ -52,7 +52,7 @@ def get_users():
     return response
 
 
-@app.route('/updateUsers', methods=["PATCH"])
+@bp.route('/updateUsers', methods=["PATCH"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.ADMIN.value)
@@ -79,7 +79,7 @@ def set_users():
     return response
 
 
-@app.route('/deleteUsers/<int:user_id>', methods=["DELETE"])
+@bp.route('/deleteUsers/<int:user_id>', methods=["DELETE"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.ADMIN.value)

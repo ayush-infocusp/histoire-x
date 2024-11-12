@@ -10,7 +10,7 @@ import werkzeug
 basedir = os.path.abspath(os.path.dirname(__file__))
 STATIC_FOLDER = 'upload_data'
 
-
+# register speech recog model
 from speech_recog import *
 
 
