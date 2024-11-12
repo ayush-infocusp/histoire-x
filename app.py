@@ -18,9 +18,18 @@ app = Flask(__name__)
 # setup the db config
 db = init_db(app, basedir)
 
-from controller.client_controller import *
-from controller.auth_contoller import *
-from controller.admin_controller import *
+#register bluerpints
+from app_histoire.main import bp as main_bp
+app.register_blueprint(main_bp)
+
+from app_histoire.client import bp as client_bp
+app.register_blueprint(client_bp, url_prefix='/app')
+
+from app_histoire.admin import bp as admin_bp
+app.register_blueprint(admin_bp, url_prefix='/admin')
+
+
+# register interceptor
 from common.interceptor import *
 
 
@@ -28,6 +37,21 @@ from common.interceptor import *
 jwt = init_jwt(app)
 CORS(app, support_credentials=True)
 
+
+@app.errorhandler(Exception)
+def handle_custom_exception(error):
+    """handle the custom exception"""
+    if isinstance(error, CommonAppException):
+        response = jsonify(error.to_dict())
+        response.status_code = error.status_code
+        return make_response(response)
+    else:
+        return jsonify({
+            'message_code': 'E20400',
+            'message': 'Something Went Wrong!!??',
+            'data': ''
+        }), 400
+# elif isinstance(error, RuntimeError)
 
 @jwt.unauthorized_loader
 def unauthorized_response(callback):
@@ -37,15 +61,7 @@ def unauthorized_response(callback):
         'message': 'Missing Authorization Header',
         'data': ''
     }), 401
-    # raise CommonAppException("Missing Authorization Header 1", status_code=401) from Exception
-
-
-@app.errorhandler(CommonAppException)
-def handle_custom_exception(error):
-    """handle the custom exception"""
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return make_response(response)
+    # raise CommonAppException("Missing Authorization Header 1", status_code=401)
 
 
 @app.errorhandler(werkzeug.exceptions.NotFound)
@@ -59,3 +75,8 @@ def handle_bad_request(e):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+# import logging
+# logging.basicConfig()
+# logging.info()

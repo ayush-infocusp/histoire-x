@@ -81,38 +81,6 @@ def delete_todos(task_id: int):
     db.session.commit()
 
 
-# get the users on the basis of the roles and deleted
-def get_user_data(page_number: int, page_size: int, delete: bool):
-    """get user data on the basis of delted filter"""
-    offset_value = (page_number - 1) * page_size
-    user_lists = User.get_users_by_status(page_size, offset_value, delete)
-    user_dicts = [userModel_to_user(user) for user in user_lists]
-    return user_dicts
-
-
-def set_user_data(user_id: int, role: Role, deleted: bool):
-    """set user data"""
-    user = User.get_user_by_id(user_id)
-    if user:
-        user.role = role
-        user.deleted = deleted
-        db.session.commit()
-        return userModel_to_user(user)
-    else:
-        return None
-
-
-def delete_user_data(user_id: int):
-    """delete user data on the basis of identifer"""
-    user = User.get_user_by_id(user_id)
-    if user:
-        user.deleted = True
-        tasks = db.session.query(Task).filter(Task.userId == user_id).all()
-        for task in tasks:
-            task.deleted = True
-        db.session.commit()
-
-
 def upload_file(request):
     """upload file and save in local"""
     is_multipart = request.form.get('is_multipart') == 'true'

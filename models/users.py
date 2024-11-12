@@ -2,6 +2,7 @@ from config.db_init import db
 from datetime import datetime
 from typing import List
 from uuid import uuid4
+from models.tasks import Task
 
 
 class User(db.Model):

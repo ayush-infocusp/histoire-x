@@ -1,10 +1,10 @@
-from app import app  # pylint: disable=import-error
+from app_histoire.client import bp  # pylint: disable=import-error
 from flask import request, make_response, send_from_directory
 from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
 from flask_pydantic import validate
 
-from services.app_service import get_todos, set_todos, update_todos, delete_todos, upload_file, get_user_file_valid
+from .client_service import get_todos, set_todos, update_todos, delete_todos, upload_file, get_user_file_valid
 
 from common.utils import get_data_from_token
 from common.validators.request_role_auth import role_required
@@ -16,7 +16,7 @@ from common.common_exception import CommonAppException
 STATIC_FOLDER = 'upload_data'
 
 
-@app.route('/app/todos', methods=["GET"])
+@bp.route('/todos', methods=["GET"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
@@ -36,12 +36,12 @@ def get_user_todos(query: GetTodosRequest):
                 'message_code': MessageCode.SUCCESS.value,
                 'data': tasks_as_dicts}
         response = make_response(response_data, 200)
-    except Exception:
-        raise CommonAppException('Task could not be Retrived!', status_code=400)
+    except Exception as exc:
+        raise CommonAppException('Task could not be Retrived!', status_code=400) from exc
     return response
 
 
-@app.route('/app/todos', methods=["POST"])
+@bp.route('/todos', methods=["POST"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
@@ -55,12 +55,12 @@ def set_user_todos(body: SetTodosRequest):
             'message_code': MessageCode.CREATED.value,
             'data': task_response}
         response = make_response(response_data, 201)
-    except Exception:
-        raise CommonAppException('Task Could not be saved!', status_code=400)
+    except Exception as exc:
+        raise CommonAppException('Task Could not be saved!', status_code=400) from exc
     return response
 
 
-@app.route('/app/todos', methods=["PATCH"])
+@bp.route('/todos', methods=["PATCH"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
@@ -78,7 +78,7 @@ def update_user_todos():
     return response
 
 
-@app.route('/app/todos/<int:task_id>', methods=["DELETE"])
+@bp.route('/todos/<int:task_id>', methods=["DELETE"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
@@ -96,7 +96,7 @@ def delete_user_todos(task_id):
     return response
 
 
-@app.route('/app/fileUpload', methods=["PUT"])
+@bp.route('/fileUpload', methods=["PUT"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
@@ -114,7 +114,7 @@ def file_upload_todos():
     return response
 
 
-@app.route('/send_file', methods=["POST"])
+@bp.route('/send_file', methods=["POST"])
 @cross_origin(supports_credentials=True)
 @jwt_required()
 @role_required(Role.CLIENT.value)
