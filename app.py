@@ -4,6 +4,8 @@ from config.db_init import init_db
 from config.jwt_init import init_jwt
 from flask_cors import CORS
 from common.common_exception import CommonAppException
+import werkzeug
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 STATIC_FOLDER = 'upload_data'
@@ -44,6 +46,15 @@ def handle_custom_exception(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return make_response(response)
+
+
+@app.errorhandler(werkzeug.exceptions.NotFound)
+def handle_bad_request(e):
+    return jsonify({
+        'message_code': 'E20401',
+        'message': 'Are you looking for something cooler!!??',
+        'data': ''
+    }), 403
 
 
 if __name__ == '__main__':
