@@ -9,7 +9,7 @@ def create_token(user):
             "username": user.username,
             "role": user.role
             }
-    access_token = create_access_token(identity=user.id,
+    access_token = create_access_token(identity=str(user.id),
                                        additional_claims=additional_claims)
     return access_token
 

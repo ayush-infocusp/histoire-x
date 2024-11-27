@@ -20,7 +20,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 # get the todos on the basis of the user
-def get_todos(request: GetTodosRequest):
+def get_todos(request):
     """get the todos data on per user basis"""
     page_number = request.pageNo
     page_size = request.pageSize

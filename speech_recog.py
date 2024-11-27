@@ -1,7 +1,6 @@
 # from IPython.display import Audio as Play_Audio
 from datasets import load_dataset
 
-from transformers import Wav2Vec2ForCTC, AutoProcessor
 from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 import torch
 

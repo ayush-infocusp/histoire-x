@@ -1,13 +1,18 @@
 version: "3.9"
 services:
   flask_app:
-    container_name: hist_dk_gni_ng_v2
+    container_name: hist_dk_gni_ng_v4
     build:
       context: .
     ports:
-      - "5002:5002"
+      - "5003:5003"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 
   nginx:

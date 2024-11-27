@@ -4,3 +4,14 @@ venv
 Speech Recognition-Copy1.ipynb
 Untitled.ipynb
 .ipynb_checkpoints
+.git
+.gitignore
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+*.log
+.mypy_cache/
+.pytest_cache/

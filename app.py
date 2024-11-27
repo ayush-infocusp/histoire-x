@@ -38,7 +38,7 @@ jwt = init_jwt(app)
 CORS(app, support_credentials=True)
 
 
-@app.errorhandler(Exception)
+@app.errorhandler(CommonAppException)
 def handle_custom_exception(error):
     """handle the custom exception"""
     if isinstance(error, CommonAppException):
@@ -62,6 +62,11 @@ def unauthorized_response(callback):
         'data': ''
     }), 401
     # raise CommonAppException("Missing Authorization Header 1", status_code=401)
+
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy"}), 200
 
 
 @app.errorhandler(werkzeug.exceptions.NotFound)
