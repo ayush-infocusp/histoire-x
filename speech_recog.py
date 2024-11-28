@@ -1,4 +1,4 @@
-from IPython.display import Audio as Play_Audio
+# from IPython.display import Audio as Play_Audio
 from datasets import load_dataset
 
 from transformers import Wav2Vec2ForCTC, AutoProcessor
@@ -6,7 +6,8 @@ from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 import torch
 
 
-fleurs = load_dataset("google/fleurs", "en_us", split="train", streaming=True)
+fleurs = load_dataset("google/fleurs", "en_us", split="train", streaming=True,
+                      trust_remote_code=True)
 dataset_iterator = iter(fleurs)
 #
 processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")

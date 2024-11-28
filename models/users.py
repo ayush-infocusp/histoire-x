@@ -2,6 +2,7 @@ from config.db_init import db
 from datetime import datetime
 from typing import List
 from uuid import uuid4
+from models.tasks import Task
 
 
 class User(db.Model):
@@ -17,13 +18,15 @@ class User(db.Model):
                           onupdate=datetime.utcnow, nullable=False)
     deleted = db.Column(db.Boolean, default=False, nullable=False)
 
-    def get_users_by_status(self, page_size: int, offset_value: int, delete: bool) -> List['User']:
+    @classmethod
+    def get_users_by_status(cls, page_size: int, offset_value: int, delete: bool) -> List['User']:
         """get users on the basis of status"""
         stmt = db.select(User).filter_by(deleted=delete).limit(page_size).offset(offset_value)
         user_lists = db.session.execute(stmt).scalars().all()
         return user_lists
 
-    def get_user_by_id(self, user_id: int) -> 'User':
+    @classmethod
+    def get_user_by_id(cls, user_id: int) -> 'User':
         """get user data on the basis of identifer"""
         stmt = db.select(User).filter_by(id=user_id)
         user = db.session.execute(stmt).scalars().one()

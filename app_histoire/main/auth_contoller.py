@@ -1,8 +1,9 @@
 from app import app  # pylint: disable=import-error
-from services.auth_service import login_user, signup_user  # pylint: disable=import-error
+from .auth_service import login_user, signup_user  # pylint: disable=import-error
 from flask import request, make_response  # pylint: disable=import-error
 from flask_cors import cross_origin  # pylint: disable=import-error
 from common.constants.app_constant import MessageCode  # pylint: disable=import-error
+from common.common_exception import CommonAppException
 
 
 @app.route('/login', methods=["POST"])
@@ -17,11 +18,7 @@ def login():
             'data': task_response}
         response = make_response(response_data, 201)
     except Exception:
-        response_data = {
-            'message': 'User cred not valid!',
-            'message_code': MessageCode.ERROR.value,
-            'data': ''}
-        response = make_response(response_data, 400)
+        raise CommonAppException('User cred not valid!', status_code=400)
     return response
 
 
@@ -37,9 +34,5 @@ def signup():
             'data': task_response}
         response = make_response(response_data, 201)
     except Exception:
-        response_data = {
-            'message': 'User Could not be saved!',
-            'message_code': MessageCode.ERROR.value,
-            'data': ''}
-        response = make_response(response_data, 400)
+        raise CommonAppException('User Could not be saved!', status_code=400)
     return response
