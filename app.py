@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, send_from_directory
 from config.db_init import init_db
 from config.jwt_init import init_jwt
 from flask_cors import CORS
@@ -14,9 +14,15 @@ STATIC_FOLDER = 'upload_data'
 from speech_recog import *
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='./static/todo_app', static_url_path='/')
 # setup the db config
 db = init_db(app, basedir)
+
+
+@app.route('/')
+def index_html():
+    return send_from_directory(app.static_folder, 'index.html')
+
 
 #register bluerpints
 from app_histoire.main import bp as main_bp

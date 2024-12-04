@@ -9,8 +9,8 @@ flask_sqlalchemy==3.1.1
 librosa==0.10.2.post1
 pydantic==2.9.2
 SQLAlchemy==2.0.35
-# --find-links https://download.pytorch.org/whl/cpu
-# torch==2.1.1+cpu
-# transformers==4.45.2
+--find-links https://download.pytorch.org/whl/cpu
+torch==2.1.1+cpu
+transformers==4.45.2
 Werkzeug==3.0.0
 gunicorn==21.2.0
